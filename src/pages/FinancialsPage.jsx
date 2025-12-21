@@ -2,7 +2,9 @@ import { use, useState, useEffect } from "react";
 import { useSearchParams } from "react-router";
 import './FinancialsPage.css'
 export function FinancialsPage() {
-    const URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+    let URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";    if (URL.endsWith('/')) {
+        URL = URL.slice(0, -1);
+    }
 
     const [statements, setStatements] = useState({});
     const [currDisplay, setCurrDisplay] = useState(false);

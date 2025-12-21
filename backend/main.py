@@ -20,7 +20,9 @@ HEADERS = {
 
 API_KEY = os.getenv("API_KEY")
 
-origins = ["*"]
+origins = ["*",
+"https://stock-financials.vercel.app"
+]
 
 app.add_middleware(
     CORSMiddleware,

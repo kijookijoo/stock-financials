@@ -2,7 +2,7 @@ import { use, useState, useEffect } from "react";
 import { useSearchParams } from "react-router";
 import './FinancialsPage.css'
 export function FinancialsPage() {
-    const URL = import.meta.env.VERCEL_API_URL || "http://127.0.0.1:8000/";
+    const URL = import.meta.env.VERCEL_API_URL || "http://127.0.0.1:8000";
 
     const [statements, setStatements] = useState({});
     const [currDisplay, setCurrDisplay] = useState(false);
@@ -23,7 +23,7 @@ export function FinancialsPage() {
 
     async function getCompanyInfo(tickerSymbol) {
         try {
-            const result = await fetch(`http://127.0.0.1:8000/info?ticker=${tickerSymbol}`);
+            const result = await fetch(`${URL}/info?ticker=${tickerSymbol}`);
             const data = await result.json();
             setCompanyInfo(data);
         } catch (e) {
@@ -40,7 +40,7 @@ export function FinancialsPage() {
         if (!tickerSymbol) return;
 
         try {
-            const result = await fetch(`http://127.0.0.1:8000/financials?ticker=${tickerSymbol}`);
+            const result = await fetch(`${URL}/financials?ticker=${tickerSymbol}`);
             if (!result.ok) throw new Error("Network response was not ok");
             const data = await result.json();
             setStatements(data);

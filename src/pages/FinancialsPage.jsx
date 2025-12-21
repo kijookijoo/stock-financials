@@ -2,7 +2,7 @@ import { use, useState, useEffect } from "react";
 import { useSearchParams } from "react-router";
 import './FinancialsPage.css'
 export function FinancialsPage() {
-    const URL = "http://127.0.0.1:8000/";
+    const URL = import.meta.env.VERCEL_API_URL || "http://127.0.0.1:8000/";
 
     const [statements, setStatements] = useState({});
     const [currDisplay, setCurrDisplay] = useState(false);
@@ -12,11 +12,11 @@ export function FinancialsPage() {
 
     useEffect(() => {
         if (ticker) {
-            setCurrDisplay(false); 
+            setCurrDisplay(false);
             getStatements(ticker);
             getCompanyInfo(ticker);
         } else {
-            setStatements([]); 
+            setStatements([]);
             setCurrDisplay(false);
         }
     }, [ticker]);
@@ -48,7 +48,7 @@ export function FinancialsPage() {
         } catch (error) {
             console.error("Failed to fetch data:", error);
             setStatements([]);
-            setCurrDisplay(false); 
+            setCurrDisplay(false);
         }
     }
 

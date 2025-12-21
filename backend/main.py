@@ -20,12 +20,7 @@ HEADERS = {
 
 API_KEY = os.getenv("API_KEY")
 
-origins = [
-    "http://localhost:5173", 
-    "http://127.0.0.1:5173",
-    "http://localhost:5174",
-    "http://127.0.0.1:5174",
-]
+origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,

@@ -1,0 +1,46 @@
+.header-container {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 95vw;
+  color: black;
+  padding: 10px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(11px);
+  -webkit-backdrop-filter: blur(11px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 0 12px 6px rgba(255, 255, 255, 0.6);
+  overflow: hidden;
+  border-radius: 15px;
+  z-index: 1000;
+}
+
+.navbar-item {
+  color: beige;
+  font-family: "SF Pro", -apple-system, BlinkMacSystemFont, "Helvetica Neue";
+  font-weight: 300;
+  font-size: 18px;
+  margin-right: 30px;
+  margin-left: 15px;
+}
+
+.navbar-item:hover {
+  cursor: pointer;
+  opacity: 0.85;
+}
+
+.items-left {
+  display: flex;
+  flex-direction: row;
+}
+
+.items-right {
+  display: flex;
+  flex-direction: row;
+}

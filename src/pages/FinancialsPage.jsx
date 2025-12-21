@@ -2,7 +2,7 @@ import { use, useState, useEffect } from "react";
 import { useSearchParams } from "react-router";
 import './FinancialsPage.css'
 export function FinancialsPage() {
-    const URL = import.meta.env.VERCEL_API_URL || "http://127.0.0.1:8000";
+    const URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
     const [statements, setStatements] = useState({});
     const [currDisplay, setCurrDisplay] = useState(false);

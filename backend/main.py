@@ -69,6 +69,7 @@ def formatHTML(htmlString):
     clean_html = htmlString[html_start:]
     soup = BeautifulSoup(clean_html, 'html.parser')
     
+    # Remove version strings or metadata that might appear as floating text
     for text_node in soup.find_all(text=True):
         if 'v3.' in text_node or 'v2.' in text_node:
             text_node.parent.decompose()
@@ -87,44 +88,42 @@ def formatHTML(htmlString):
         
         for row in rows:
             cells = row.find_all(["td", "th"])
-            current_row_vals = {}
             
+            # Clean up repetitive headers at the top of tables
+            row_text = row.get_text().strip().lower()
+            if "statement" in row_text and len(row_text) < 100:
+                row.decompose()
+                continue
+
+            current_row_vals = {}
             for i, cell in enumerate(cells):
                 val = parse_sec_number(cell.get_text(strip=True))
                 if val is not None:
                     current_row_vals[i] = (val, cell)
-                    
-                    if i > 0 and (i-1) in current_row_vals:
-                        prev_val, _ = current_row_vals[i-1]
-                        pass
 
-            for i in current_row_vals:
-                curr_val, curr_cell = current_row_vals[i]
-                found_prev = False
-                
-                if i+1 in current_row_vals:
-                    prev_val, _ = current_row_vals[i+1]
-                    found_prev = True
-                elif i+1 in prev_row_vals:
-                    prev_val, _ = prev_row_vals[i+1]
-                    found_prev = True
-                
-                if found_prev and prev_val != 0:
-                    change = ((curr_val - prev_val) / abs(prev_val)) * 100
-                    if abs(change) < 10000:
-                        badge = soup.new_tag("span", attrs={
-                            "class": f"growth-badge {('pos' if change >= 0 else 'neg')}"
-                        })
-                        icon = "▲" if change >= 0 else "▼"
-                        badge.string = f"{icon} {abs(change):.1f}%"
-                        curr_cell.append(badge)
+            data_indices = sorted(current_row_vals.keys())
+            
+            for idx_pos in [0, 2]:
+                if idx_pos + 1 < len(data_indices):
+                    i = data_indices[idx_pos]
+                    next_i = data_indices[idx_pos + 1]
+                    
+                    curr_val, curr_cell = current_row_vals[i]
+                    prev_val, _ = current_row_vals[next_i]
+                    
+                    if prev_val != 0:
+                        change = ((curr_val - prev_val) / abs(prev_val)) * 100
+                        if abs(change) < 10000:
+                            badge = soup.new_tag("span", attrs={"class": f"growth-badge {('pos' if change >= 0 else 'neg')}"})
+                            icon = "▲" if change >= 0 else "▼"
+                            badge.string = f"{icon} {abs(change):.1f}%"
+                            curr_cell.append(badge)
 
             prev_row_vals = current_row_vals
 
     allowed_attrs = ['rowspan', 'colspan', 'class']
     for tag in soup.find_all(True):
-        tag.attrs = {key: value for key, value in tag.attrs.items() 
-                     if key in ['rowspan', 'colspan']}
+        tag.attrs = {key: value for key, value in tag.attrs.items() if key in allowed_attrs}
         
     for empty_tag in soup.find_all(['tr', 'td', 'div']):
         if not empty_tag.get_text(strip=True) and not empty_tag.contents:

@@ -47,6 +47,7 @@ export function FinancialsPage() {
             const data = await result.json();
             setStatements(data);
             setCurrDisplay(true);
+            console.log(data["incomeStatement"]);
         } catch (error) {
             console.error("Failed to fetch data:", error);
             setStatements([]);
@@ -81,7 +82,7 @@ export function FinancialsPage() {
                         </div>}
 
                         <h4 className="company-ticker">
-                            ({ticker})
+                            {ticker && currDisplay && ("(" + ticker + ")")}
                         </h4>
                     </div>
 
@@ -89,25 +90,25 @@ export function FinancialsPage() {
                         <>
                             {currDisplay &&
                                 <>
-                                    <h2 className="statement-header">
+                                    <h1 className="statement-header">
                                         Income Statement
-                                    </h2>
+                                    </h1>
 
                                     <div className="report-container">
                                         {formatHTML(statements["incomeStatement"])}
                                     </div>
 
-                                    <h2 className="statement-header">
+                                    <h1 className="statement-header">
                                         Balance Sheet
-                                    </h2>
+                                    </h1>
 
                                     <div className="report-container">
                                         {formatHTML(statements["balanceSheet"])}
                                     </div>
 
-                                    <h2 className="statement-header">
+                                    <h1 className="statement-header">
                                         Statement of Cash Flows
-                                    </h2>
+                                    </h1>
 
                                     <div className="report-container">
                                         {formatHTML(statements["cashFlowStatement"])}

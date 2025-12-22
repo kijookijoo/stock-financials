@@ -48,6 +48,20 @@ def getFinancialStatementType(fileName):
     
     return None
 
+def parse_sec_number(text):
+    if not text: return None
+    clean = text.replace('$', '').replace(',', '').replace('%', '').strip()
+    if not clean: return None
+    is_negative = False
+    if clean.startswith('(') and clean.endswith(')'):
+        is_negative = True
+        clean = clean[1:-1]
+    try:
+        val = float(clean)
+        return -val if is_negative else val
+    except ValueError:
+        return None
+
 def formatHTML(htmlString): 
     html_start = htmlString.find("<html")
     if html_start == -1:
@@ -55,14 +69,59 @@ def formatHTML(htmlString):
     clean_html = htmlString[html_start:]
     soup = BeautifulSoup(clean_html, 'html.parser')
     
+    for text_node in soup.find_all(text=True):
+        if 'v3.' in text_node or 'v2.' in text_node:
+            text_node.parent.decompose()
+
     for tag in soup.find_all("a"):
         tag.unwrap()
         
     for table in soup.find_all("table"):
-        text = table.get_text().lower()
-        if any(term in text for term in ["namespace prefix", "data type", "balance type", "period type"]):
+        text_content = table.get_text().lower()
+        if any(term in text_content for term in ["namespace prefix", "data type", "balance type"]):
             table.decompose()
+            continue
 
+        rows = table.find_all("tr")
+        prev_row_vals = {} 
+        
+        for row in rows:
+            cells = row.find_all(["td", "th"])
+            current_row_vals = {}
+            
+            for i, cell in enumerate(cells):
+                val = parse_sec_number(cell.get_text(strip=True))
+                if val is not None:
+                    current_row_vals[i] = (val, cell)
+                    
+                    if i > 0 and (i-1) in current_row_vals:
+                        prev_val, _ = current_row_vals[i-1]
+                        pass
+
+            for i in current_row_vals:
+                curr_val, curr_cell = current_row_vals[i]
+                found_prev = False
+                
+                if i+1 in current_row_vals:
+                    prev_val, _ = current_row_vals[i+1]
+                    found_prev = True
+                elif i+1 in prev_row_vals:
+                    prev_val, _ = prev_row_vals[i+1]
+                    found_prev = True
+                
+                if found_prev and prev_val != 0:
+                    change = ((curr_val - prev_val) / abs(prev_val)) * 100
+                    if abs(change) < 10000:
+                        badge = soup.new_tag("span", attrs={
+                            "class": f"growth-badge {('pos' if change >= 0 else 'neg')}"
+                        })
+                        icon = "▲" if change >= 0 else "▼"
+                        badge.string = f"{icon} {abs(change):.1f}%"
+                        curr_cell.append(badge)
+
+            prev_row_vals = current_row_vals
+
+    allowed_attrs = ['rowspan', 'colspan', 'class']
     for tag in soup.find_all(True):
         tag.attrs = {key: value for key, value in tag.attrs.items() 
                      if key in ['rowspan', 'colspan']}

@@ -1,5 +1,5 @@
 .page-container {
-  width: 100vw;
+  width: 100%;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -80,9 +80,9 @@
 
 .report-container td:first-child,
 .report-container th:first-child {
-  white-space: normal; 
+  white-space: normal;
   word-wrap: break-word;
-  max-width: 400px; 
+  max-width: 400px;
   font-weight: 600;
   color: #1a252f;
   padding-right: 40px;
@@ -98,9 +98,34 @@
   background-color: #f8f9fa;
 }
 
-.report-container tr:last-child td,
-.report-container tr:last-child th {
-  border-bottom: none;
+.growth-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 20px;
+  margin-left: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.growth-badge.pos {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.growth-badge.neg {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.report-container td:not(:first-child) {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  padding: 12px 20px;
 }
 
 .input-container {
@@ -152,7 +177,8 @@
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   font-weight: 400;
   color: black;
-  margin: 0;
+  margin-bottom: 15px;
+  margin-top: 15px;
 }
 
 .company-ticker {

@@ -2,7 +2,7 @@
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  width: 95vw;
+  width: 100%;
   color: black;
   padding: 10px 40px;
   display: flex;

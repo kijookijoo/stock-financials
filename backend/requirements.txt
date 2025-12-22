@@ -5,3 +5,4 @@ beautifulsoup4
 sec-downloader
 python-dotenv
 lxml
+yfinance

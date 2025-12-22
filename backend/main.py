@@ -6,6 +6,7 @@ import requests
 import os
 from dotenv import load_dotenv
 from bs4 import BeautifulSoup
+import yfinance as yf
 
 load_dotenv()
 
@@ -34,19 +35,15 @@ def getFinancialStatementType(fileName):
     fileName_lower = fileName.lower()
     
     # Check for Income Statement
-    if ("income statement" in fileName_lower or 
-        "operations" in fileName_lower or 
-        "comprehensive loss" in fileName_lower or 
-        "comprehensive income" in fileName_lower):
+    if any(term in fileName_lower for term in ["income statement", "operations", "comprehensive loss", "comprehensive income"]):
         return "incomeStatement"
     
     # Check for Balance Sheet
-    if ("balance sheet" in fileName_lower or 
-        "financial position" in fileName_lower):
+    if any(term in fileName_lower for term in ["balance sheet", "financial position"]):
         return "balanceSheet"
     
     # Check for Cash Flow
-    if ("cash flow" in fileName_lower):
+    if "cash flow" in fileName_lower:
         return "cashFlowStatement"
     
     return None
@@ -75,10 +72,12 @@ def exportasHTML(fileURL, short_name):
 def parseandFind(base_url):
     index_html = requests.get(base_url, headers = HEADERS).text
     soup = BeautifulSoup(index_html, "html.parser")
+    
     summary_url = base_url + "FilingSummary.xml"
     summary_xml = requests.get(summary_url, headers=HEADERS).text
-    soup = BeautifulSoup(summary_xml, "xml")
-    return soup.find_all("Report")
+    # Using lxml for XML parsing (ensure lxml is in requirements.txt)
+    soup_xml = BeautifulSoup(summary_xml, "xml")
+    return soup_xml.find_all("Report")
 
 @app.get("/financials")
 def read_financials(ticker : str):
@@ -88,64 +87,62 @@ def read_financials(ticker : str):
         "cashFlowStatement" : ""
     }
     
-    metadatas = dl.get_filing_metadatas(
-            RequestedFilings(ticker_or_cik=ticker, form_type="10-Q", limit = 2)
-        )
+    try:
+        metadatas = dl.get_filing_metadatas(
+                RequestedFilings(ticker_or_cik=ticker, form_type="10-Q", limit = 1)
+            )
 
-    if not metadatas:
-        return financial_statements
+        if not metadatas:
+            return financial_statements
 
-    base_url = None
-    for metadata in metadatas:
+        # Get the first metadata item
+        metadata = metadatas[0]
         base_url = metadata.primary_doc_url.rsplit("/", 1)[0] + "/"
-        break  
-    
-    if not base_url:
+        
+        reports = parseandFind(base_url)
+
+        for report in reports:
+            short_name_tag = report.find("ShortName")
+            if not short_name_tag:
+                continue
+            short_name = short_name_tag.text
+            
+            docType = getFinancialStatementType(short_name)
+            if docType is None:
+                continue
+
+            html_file = report.find("HtmlFileName")
+            if html_file is None:
+                continue
+            
+            html_file = html_file.text
+            file_url = base_url + html_file
+
+            try:
+                statement_data = exportasHTML(file_url, short_name)
+                # Only fill if not already found
+                if financial_statements[docType] == "":
+                    financial_statements[docType] = formatHTML(statement_data["content"])
+            except Exception as e:
+                print(f"Error fetching {short_name}: {e}")
+                continue      
+
         return financial_statements
-    
-    reports = parseandFind(base_url)
-
-    for report in reports:
-        short_name_tag = report.find("ShortName")
-        if not short_name_tag:
-            continue
-        short_name = short_name_tag.text
-        
-        docType = getFinancialStatementType(short_name)
-        if docType is None:
-            continue
-
-        html_file = report.find("HtmlFileName")
-        if html_file is None:
-            continue
-        
-        html_file = html_file.text
-        file_url = base_url + html_file
-
-        try:
-            statement_data = exportasHTML(file_url, short_name)
-            if financial_statements[docType] == "":
-                financial_statements[docType] = formatHTML(statement_data["content"])
-        except Exception as e:
-            print(f"Error fetching {short_name}: {e}")
-            continue      
-
-    return financial_statements
+    except Exception as e:
+        print(f"Global error fetching financials for {ticker}: {e}")
+        return financial_statements
 
 @app.get("/info")
 def get_company_info(ticker: str):
-    url = f"https://api.api-ninjas.com/v1/logo?ticker={ticker}"
-    headers = {
-        "X-API-Key" : API_KEY
-    }
-
     try:
-        res = requests.get(url, headers=headers)
-        res.raise_for_status()
-        data = res.json()
-        if data and len(data) > 0:
-            return data[0]
-        return {"name": "", "image": ""}
+        company = yf.Ticker(ticker)
+        name = company.info.get("longName") or company.info.get("shortName") or ticker.upper()
     except Exception as e:
-        print(f"Error fetching logo: {e}")
-        return {"name": "", "image": ""}
+        print(f"Error fetching yfinance info: {e}")
+        name = ticker.upper()
+        
+    logo_url = f"https://financialmodelingprep.com/image-stock/{ticker.upper()}.png"
+    return {
+        "name": name, 
+        "image": logo_url
+    }

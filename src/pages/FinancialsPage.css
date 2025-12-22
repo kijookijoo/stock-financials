@@ -41,20 +41,66 @@
 
 .report-container {
   background-color: white;
-  color: black;
-  border: solid;
-  border-color: black;
-  border-radius: 20px;
-  overflow-x: auto;
-  width: fit-content;
-  max-width: 75%;
-  padding: 20px;
+  color: #2c3e50;
+  border-radius: 16px;
+  width: 75vw;
+  max-width: 1200px;
+  padding: 32px;
   box-sizing: border-box;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .report-container table {
-  width: auto !important;
-  margin: 0 auto !important;
+  width: 100%;
+  border-collapse: collapse;
+  font-family: "Inter", -apple-system, system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  table-layout: auto;
+}
+
+.report-container td,
+.report-container th {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f1f3f5;
+  color: #34495e;
+  text-align: right;
+}
+
+.report-container th {
+  font-weight: 700;
+  color: #1a252f;
+  background-color: #f8fafc;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+}
+
+.report-container td:first-child,
+.report-container th:first-child {
+  white-space: normal; 
+  word-wrap: break-word;
+  max-width: 400px; 
+  font-weight: 600;
+  color: #1a252f;
+  padding-right: 40px;
+  text-align: left;
+}
+
+.report-container td:not(:first-child) {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.report-container tr:hover td {
+  background-color: #f8f9fa;
+}
+
+.report-container tr:last-child td,
+.report-container tr:last-child th {
+  border-bottom: none;
 }
 
 .input-container {
@@ -73,7 +119,33 @@
 }
 
 .company-logo {
-  width: 240px;
+  width: 140px;
+  max-height: 140px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.2));
+}
+
+.logo-wrapper {
+  background-color: #1a252f;
+  padding: 30px;
+  border-radius: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  position: relative;
+}
+
+.logo-wrapper::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 40px;
+  box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.05);
+  pointer-events: none;
 }
 
 .company-name {

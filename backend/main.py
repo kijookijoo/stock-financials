@@ -58,7 +58,20 @@ def formatHTML(htmlString):
     for tag in soup.find_all("a"):
         tag.unwrap()
         
-    return soup.prettify()
+    for table in soup.find_all("table"):
+        text = table.get_text().lower()
+        if any(term in text for term in ["namespace prefix", "data type", "balance type", "period type"]):
+            table.decompose()
+
+    for tag in soup.find_all(True):
+        tag.attrs = {key: value for key, value in tag.attrs.items() 
+                     if key in ['rowspan', 'colspan']}
+        
+    for empty_tag in soup.find_all(['tr', 'td', 'div']):
+        if not empty_tag.get_text(strip=True) and not empty_tag.contents:
+            empty_tag.decompose()
+
+    return str(soup)
     
 def exportasHTML(fileURL, short_name):
     res = requests.get(fileURL, headers = HEADERS)
@@ -75,7 +88,6 @@ def parseandFind(base_url):
     
     summary_url = base_url + "FilingSummary.xml"
     summary_xml = requests.get(summary_url, headers=HEADERS).text
-    # Using lxml for XML parsing (ensure lxml is in requirements.txt)
     soup_xml = BeautifulSoup(summary_xml, "xml")
     return soup_xml.find_all("Report")
 
@@ -95,7 +107,6 @@ def read_financials(ticker : str):
         if not metadatas:
             return financial_statements
 
-        # Get the first metadata item
         metadata = metadatas[0]
         base_url = metadata.primary_doc_url.rsplit("/", 1)[0] + "/"
         
@@ -120,7 +131,6 @@ def read_financials(ticker : str):
 
             try:
                 statement_data = exportasHTML(file_url, short_name)
-                # Only fill if not already found
                 if financial_statements[docType] == "":
                     financial_statements[docType] = formatHTML(statement_data["content"])
             except Exception as e:

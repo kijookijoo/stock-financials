@@ -2,7 +2,7 @@ import { use, useState, useEffect } from "react";
 import { useSearchParams } from "react-router";
 import './FinancialsPage.css'
 export function FinancialsPage() {
-    let URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";    if (URL.endsWith('/')) {
+    let URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000"; if (URL.endsWith('/')) {
         URL = URL.slice(0, -1);
     }
 
@@ -71,13 +71,13 @@ export function FinancialsPage() {
                 <div className="reports-container">
                     <div className="info-container">
                         {(companyInfo["image"] != "") &&
-                            <div>
+                            <div className="logo-wrapper">
                                 {ticker && currDisplay && <img className="company-logo" src={companyInfo["image"]} />}
                             </div>
                         }
 
                         {(companyInfo["name"] != "") && <div className="company-name">
-                            {ticker && currDisplay && <h1>{companyInfo["name"]} Inc.</h1>}
+                            {ticker && currDisplay && <h1>{companyInfo["name"]}</h1>}
                         </div>}
 
                         <h4 className="company-ticker">

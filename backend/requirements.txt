@@ -6,3 +6,7 @@ sec-downloader
 python-dotenv
 lxml
 yfinance
+openai
+google-genai
+httpx
+anyio

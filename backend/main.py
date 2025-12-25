@@ -1,216 +1,30 @@
 from fastapi import FastAPI
-from sec_downloader import Downloader
-from sec_downloader.types import RequestedFilings
 from fastapi.middleware.cors import CORSMiddleware
-import requests
-import os
 from dotenv import load_dotenv
-from bs4 import BeautifulSoup
-import yfinance as yf
+import os
+
+# Import routers from the other modules
+from financials import router as financials_router
+from companyInfo import router as company_info_router
+from analysis import router as analysis_router
 
 load_dotenv()
 
 app = FastAPI()
-dl = Downloader("Developer", "kjyoon0125@gmail.com")
 
-HEADERS = {
-    "User-Agent": "UBC Computer Science Student Personal Project kjyoon0125@gmail.com",
-    "Accept-Encoding": "gzip, deflate",
-    "Host": "www.sec.gov"
-}
-
-API_KEY = os.getenv("API_KEY")
-
-origins = ["*"]
-
+# CORS Middleware configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["*"],    
-    allow_headers=["*"],     
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-def getFinancialStatementType(fileName):
-    fileName_lower = fileName.lower()
-    
-    # Check for Income Statement
-    if any(term in fileName_lower for term in ["income statement", "operations", "comprehensive loss", "comprehensive income"]):
-        return "incomeStatement"
-    
-    # Check for Balance Sheet
-    if any(term in fileName_lower for term in ["balance sheet", "financial position"]):
-        return "balanceSheet"
-    
-    # Check for Cash Flow
-    if "cash flow" in fileName_lower:
-        return "cashFlowStatement"
-    
-    return None
+app.include_router(financials_router)
+app.include_router(company_info_router)
+app.include_router(analysis_router)
 
-def parse_sec_number(text):
-    if not text: return None
-    clean = text.replace('$', '').replace(',', '').replace('%', '').strip()
-    if not clean: return None
-    is_negative = False
-    if clean.startswith('(') and clean.endswith(')'):
-        is_negative = True
-        clean = clean[1:-1]
-    try:
-        val = float(clean)
-        return -val if is_negative else val
-    except ValueError:
-        return None
-
-def formatHTML(htmlString): 
-    html_start = htmlString.find("<html")
-    if html_start == -1:
-        html_start = 0
-    clean_html = htmlString[html_start:]
-    soup = BeautifulSoup(clean_html, 'html.parser')
-    
-    # Remove version strings or metadata that might appear as floating text
-    for text_node in soup.find_all(text=True):
-        if 'v3.' in text_node or 'v2.' in text_node:
-            text_node.parent.decompose()
-
-    for tag in soup.find_all("a"):
-        tag.unwrap()
-        
-    for table in soup.find_all("table"):
-        text_content = table.get_text().lower()
-        if any(term in text_content for term in ["namespace prefix", "data type", "balance type"]):
-            table.decompose()
-            continue
-
-        rows = table.find_all("tr")
-        prev_row_vals = {} 
-        
-        for row in rows:
-            cells = row.find_all(["td", "th"])
-            
-            # Clean up repetitive headers at the top of tables
-            row_text = row.get_text().strip().lower()
-            if "statement" in row_text and len(row_text) < 100:
-                row.decompose()
-                continue
-
-            current_row_vals = {}
-            for i, cell in enumerate(cells):
-                val = parse_sec_number(cell.get_text(strip=True))
-                if val is not None:
-                    current_row_vals[i] = (val, cell)
-
-            data_indices = sorted(current_row_vals.keys())
-            
-            for idx_pos in [0, 2]:
-                if idx_pos + 1 < len(data_indices):
-                    i = data_indices[idx_pos]
-                    next_i = data_indices[idx_pos + 1]
-                    
-                    curr_val, curr_cell = current_row_vals[i]
-                    prev_val, _ = current_row_vals[next_i]
-                    
-                    if prev_val != 0:
-                        change = ((curr_val - prev_val) / abs(prev_val)) * 100
-                        if abs(change) < 10000:
-                            badge = soup.new_tag("span", attrs={"class": f"growth-badge {('pos' if change >= 0 else 'neg')}"})
-                            icon = "▲" if change >= 0 else "▼"
-                            badge.string = f"{icon} {abs(change):.1f}%"
-                            curr_cell.append(badge)
-
-            prev_row_vals = current_row_vals
-
-    allowed_attrs = ['rowspan', 'colspan', 'class']
-    for tag in soup.find_all(True):
-        tag.attrs = {key: value for key, value in tag.attrs.items() if key in allowed_attrs}
-        
-    for empty_tag in soup.find_all(['tr', 'td', 'div']):
-        if not empty_tag.get_text(strip=True) and not empty_tag.contents:
-            empty_tag.decompose()
-
-    return str(soup)
-    
-def exportasHTML(fileURL, short_name):
-    res = requests.get(fileURL, headers = HEADERS)
-    res.raise_for_status()
-    
-    return {
-        "name": short_name,
-        "content": res.text
-    }
-
-def parseandFind(base_url):
-    index_html = requests.get(base_url, headers = HEADERS).text
-    soup = BeautifulSoup(index_html, "html.parser")
-    
-    summary_url = base_url + "FilingSummary.xml"
-    summary_xml = requests.get(summary_url, headers=HEADERS).text
-    soup_xml = BeautifulSoup(summary_xml, "xml")
-    return soup_xml.find_all("Report")
-
-@app.get("/financials")
-def read_financials(ticker : str):
-    financial_statements = {
-        "balanceSheet" : "",
-        "incomeStatement" : "",
-        "cashFlowStatement" : ""
-    }
-    
-    try:
-        metadatas = dl.get_filing_metadatas(
-                RequestedFilings(ticker_or_cik=ticker, form_type="10-Q", limit = 1)
-            )
-
-        if not metadatas:
-            return financial_statements
-
-        metadata = metadatas[0]
-        base_url = metadata.primary_doc_url.rsplit("/", 1)[0] + "/"
-        
-        reports = parseandFind(base_url)
-
-        for report in reports:
-            short_name_tag = report.find("ShortName")
-            if not short_name_tag:
-                continue
-            short_name = short_name_tag.text
-            
-            docType = getFinancialStatementType(short_name)
-            if docType is None:
-                continue
-
-            html_file = report.find("HtmlFileName")
-            if html_file is None:
-                continue
-            
-            html_file = html_file.text
-            file_url = base_url + html_file
-
-            try:
-                statement_data = exportasHTML(file_url, short_name)
-                if financial_statements[docType] == "":
-                    financial_statements[docType] = formatHTML(statement_data["content"])
-            except Exception as e:
-                print(f"Error fetching {short_name}: {e}")
-                continue      
-
-        return financial_statements
-    except Exception as e:
-        print(f"Global error fetching financials for {ticker}: {e}")
-        return financial_statements
-
-@app.get("/info")
-def get_company_info(ticker: str):
-    try:
-        company = yf.Ticker(ticker)
-        name = company.info.get("longName") or company.info.get("shortName") or ticker.upper()
-    except Exception as e:
-        print(f"Error fetching yfinance info: {e}")
-        name = ticker.upper()
-        
-    logo_url = f"https://financialmodelingprep.com/image-stock/{ticker.upper()}.png"
-    return {
-        "name": name, 
-        "image": logo_url
-    }
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

@@ -1,38 +1,33 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-import requests
-import os
+from fastapi import APIRouter
+import yfinance as yf
+import httpx
+import anyio
 
-app = FastAPI()
-API_KEY = os.getenv("API_KEY")
+router = APIRouter()
 
-origins = [
-    "*"
-]
+# Simple in-memory cache to reduce latency for repeated searches
+cache = {}
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],    
-    allow_headers=["*"],     
-)
+@router.get("/info")
+async def get_company_info(ticker: str):
+    ticker = ticker.upper()
+    if ticker in cache:
+        return cache[ticker]
 
-@app.get("/info")
-def root(ticker : str):
-    return get_info(ticker)
-
-def get_info(ticker: str):
-    url = "https://api.api-ninjas.com/v1/logo?name=&ticker="
-    headers = {
-        "X-API-Key" : API_KEY
+    try:
+        # yfinance info is a blocking I/O call, run it in a thread pool
+        company = await anyio.to_thread.run_sync(yf.Ticker, ticker)
+        info = await anyio.to_thread.run_sync(lambda: company.info)
+        name = info.get("longName") or info.get("shortName") or ticker
+    except Exception as e:
+        print(f"Error fetching yfinance info: {e}")
+        name = ticker
+        
+    logo_url = f"https://financialmodelingprep.com/image-stock/{ticker}.png"
+    
+    result = {
+        "name": name, 
+        "image": logo_url
     }
-    params = {
-        "ticker" : ticker
-    }
-    
-    res = requests.get(url, headers=headers, params=params)
-    
-    return res.json()
-    
-    
+    cache[ticker] = result
+    return result

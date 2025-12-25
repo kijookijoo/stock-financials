@@ -1,8 +1,10 @@
-import { use, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router";
 import './FinancialsPage.css'
+import { motion, AnimatePresence } from "motion/react";
+
 export function FinancialsPage() {
-    let URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000"; if (URL.endsWith('/')) {
+    let URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8004"; if (URL.endsWith('/')) {
         URL = URL.slice(0, -1);
     }
 
@@ -11,47 +13,54 @@ export function FinancialsPage() {
     const [searchParams, setSearchParams] = useSearchParams();
     const [companyInfo, setCompanyInfo] = useState({});
     const ticker = searchParams.get("ticker");
+    const [currStatement, setCurrStatement] = useState("");
+    const [statementDisplay, setStatementDisplay] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         if (ticker) {
             setCurrDisplay(false);
-            getStatements(ticker);
-            getCompanyInfo(ticker);
+            setStatementDisplay(false);
+            fetchData(ticker);
         } else {
-            setStatements([]);
+            setStatements({});
             setCurrDisplay(false);
+            setStatementDisplay(false);
         }
     }, [ticker]);
 
-    async function getCompanyInfo(tickerSymbol) {
-        try {
-            const result = await fetch(`${URL}/info?ticker=${tickerSymbol}`);
-            const data = await result.json();
-            setCompanyInfo(data);
-        } catch (e) {
-            const data = {
-                "name": "",
-                "image": "",
-            };
-            setCompanyInfo(data);
-        }
-
-    }
-
-    async function getStatements(tickerSymbol) {
+    async function fetchData(tickerSymbol) {
         if (!tickerSymbol) return;
+        setIsLoading(true);
 
         try {
-            const result = await fetch(`${URL}/financials?ticker=${tickerSymbol}`);
-            if (!result.ok) throw new Error("Network response was not ok");
-            const data = await result.json();
-            setStatements(data);
+            const [infoResult, introResult, financialsResult] = await Promise.all([
+                fetch(`${URL}/info?ticker=${tickerSymbol}`).then(res => res.json()),
+                fetch(`${URL}/intro?ticker=${tickerSymbol}`).then(res => res.text()),
+                fetch(`${URL}/financials?ticker=${tickerSymbol}`).then(res => res.json())
+            ]);
+
+            const companyData = { ...infoResult, intro: introResult.replace(/^"|"$/g, '') };
+
+            if (companyData.image) {
+                await new Promise((resolve) => {
+                    const img = new Image();
+                    img.src = companyData.image;
+                    img.onload = resolve;
+                });
+            }
+
+            setCompanyInfo(companyData);
+            setStatements(financialsResult);
             setCurrDisplay(true);
-            console.log(data["incomeStatement"]);
+
         } catch (error) {
-            console.error("Failed to fetch data:", error);
-            setStatements([]);
+            console.error("Error fetching data:", error);
+            setStatements({});
+            setCompanyInfo({});
             setCurrDisplay(false);
+        } finally {
+            setIsLoading(false);
         }
     }
 
@@ -59,6 +68,11 @@ export function FinancialsPage() {
         return (
             <div dangerouslySetInnerHTML={{ __html: htmlString }} />
         );
+    }
+
+    function changeStatementDisplay(item) {
+        setCurrStatement(item);
+        setStatementDisplay(true);
     }
 
     return (
@@ -71,60 +85,81 @@ export function FinancialsPage() {
 
                 <div className="reports-container">
                     <div className="info-container">
-                        {(companyInfo["image"] != "") &&
+                        {(companyInfo["image"] && companyInfo["image"] !== "") &&
                             <div className="logo-wrapper">
                                 {ticker && currDisplay && <img className="company-logo" src={companyInfo["image"]} />}
                             </div>
                         }
 
-                        {(companyInfo["name"] != "") && <div className="company-name">
+                        {(companyInfo["name"] && companyInfo["name"] !== "") && <div className="company-name">
                             {ticker && currDisplay && <h1>{companyInfo["name"]}</h1>}
                         </div>}
 
                         <h4 className="company-ticker">
                             {ticker && currDisplay && ("(" + ticker + ")")}
                         </h4>
+
+                        {(companyInfo["intro"] && companyInfo["intro"] !== "") &&
+                            <p className="company-intro">
+                                {ticker && currDisplay && companyInfo["intro"]}
+                            </p>
+                        }
                     </div>
 
-                    {currDisplay && (
+                    <div className="summary-container">
+                        <AnimatePresence>
+                            <motion.button className="income-statement"
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => changeStatementDisplay("incomeStatement")}
+                            >
+                                <motion.img className="incomestatement-image" src='./images/incomestatement.png' />
+                            </motion.button>
+                        </AnimatePresence>
+
+                        <AnimatePresence>
+                            <motion.button className="balance-sheet"
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => changeStatementDisplay("balanceSheet")}
+                            >
+                                <motion.img className="incomestatement-image" src='./images/balancesheet.png' />
+
+                            </motion.button>
+                        </AnimatePresence>
+
+                        <AnimatePresence>
+                            <motion.button className="statement-cashflow"
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => changeStatementDisplay("cashFlowStatement")}
+                            >
+                                <motion.img className="incomestatement-image" src='./images/cashflowstatement.png' />
+
+                            </motion.button>
+                        </AnimatePresence>
+                    </div>
+
+                    {currDisplay && statementDisplay && (
                         <>
-                            {currDisplay &&
-                                <>
-                                    <h1 className="statement-header">
-                                        Income Statement
-                                    </h1>
+                            <h1 className="statement-header">
+                                {currStatement === "incomeStatement" && "Income Statement"}
+                                {currStatement === "balanceSheet" && "Balance Sheet"}
+                                {currStatement === "cashFlowStatement" && "Statement of Cash Flows"}
+                            </h1>
 
-                                    <div className="report-container">
-                                        {formatHTML(statements["incomeStatement"])}
-                                    </div>
-
-                                    <h1 className="statement-header">
-                                        Balance Sheet
-                                    </h1>
-
-                                    <div className="report-container">
-                                        {formatHTML(statements["balanceSheet"])}
-                                    </div>
-
-                                    <h1 className="statement-header">
-                                        Statement of Cash Flows
-                                    </h1>
-
-                                    <div className="report-container">
-                                        {formatHTML(statements["cashFlowStatement"])}
-                                    </div>
-                                </>
-                            }
+                            <div className="report-container">
+                                {formatHTML(statements[currStatement])}
+                            </div>
                         </>
                     )}
 
-                    {currDisplay && statements.length === 0 && ticker && (
+                    {currDisplay && Object.keys(statements).length === 0 && ticker && (
                         <div style={{ color: 'white' }}>No results found for {ticker}.</div>
                     )}
 
                 </div>
-
-            </div >
+                2            </div >
         </>
     );
 }

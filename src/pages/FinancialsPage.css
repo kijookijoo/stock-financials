@@ -13,8 +13,10 @@
 .ticker-input {
   padding: 20px;
   width: 300px;
-  height: 10px;
+  /* background: rgba(255, 255, 255, 0.15); */
   font-size: 20px;
+
+  outline: none;
 }
 
 .search-button {
@@ -130,13 +132,27 @@
 
 .info-container {
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  flex-direction: row;
+  align-items: top;
   justify-content: center;
   text-align: center;
   background-color: white;
   width: 100vw;
-  padding: 20px;
+  padding: 40px 20px;
+  gap: 40px;
+}
+
+.profile-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 200px;
+}
+
+.intro-container {
+  max-width: 600px;
+  display: flex;
+  align-items: center;
 }
 
 .company-logo {
@@ -179,7 +195,7 @@
 
 .company-intro {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  font-size: 16px;
+  font-size: 25px;
   line-height: 1.5;
   color: #4a5568;
   max-width: 600px;
@@ -199,12 +215,12 @@
 }
 
 .summary-container {
-    display: flex;
-    flex-direction: row;
-    width: 80%;
-    justify-content: space-evenly;
+  display: flex;
+  flex-direction: row;
+  width: 80%;
+  justify-content: space-evenly;
 }
 
 .incomestatement-image {
-    width: 200px;
+  width: 200px;
 }

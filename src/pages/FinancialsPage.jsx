@@ -34,10 +34,13 @@ export function FinancialsPage() {
         setIsLoading(true);
 
         try {
-            const [infoResult, introResult, financialsResult] = await Promise.all([
+            const [infoResult, financialsResult] = await Promise.all([
                 fetch(`${URL}/info?ticker=${tickerSymbol}`).then(res => res.json()),
-                fetch(`${URL}/intro?ticker=${tickerSymbol}`).then(res => res.text()),
                 fetch(`${URL}/financials?ticker=${tickerSymbol}`).then(res => res.json())
+            ]);
+
+            const [introResult] = await Promise.all([
+                fetch(`${URL}/intro?name=${infoResult["name"]}`).then(res => res.text()),
             ]);
 
             const companyData = { ...infoResult, intro: introResult.replace(/^"|"$/g, '') };
@@ -85,26 +88,33 @@ export function FinancialsPage() {
 
                 <div className="reports-container">
                     <div className="info-container">
-                        {(companyInfo["image"] && companyInfo["image"] !== "") &&
-                            <div className="logo-wrapper">
-                                {ticker && currDisplay && <img className="company-logo" src={companyInfo["image"]} />}
-                            </div>
-                        }
+                        <div className="profile-container">
+                            {(companyInfo["image"] && companyInfo["image"] !== "") &&
+                                <div className="logo-wrapper">
+                                    {ticker && currDisplay && <img className="company-logo" src={companyInfo["image"]} />}
+                                </div>
+                            }
 
-                        {(companyInfo["name"] && companyInfo["name"] !== "") && <div className="company-name">
-                            {ticker && currDisplay && <h1>{companyInfo["name"]}</h1>}
-                        </div>}
+                            {(companyInfo["name"] && companyInfo["name"] !== "") && <div className="company-name">
+                                {ticker && currDisplay && <h1>{companyInfo["name"]}</h1>}
+                            </div>}
 
-                        <h4 className="company-ticker">
-                            {ticker && currDisplay && ("(" + ticker + ")")}
-                        </h4>
-
+                            <h4 className="company-ticker">
+                                {ticker && currDisplay && ("(" + ticker + ")")}
+                            </h4>
+                        </div>
+                        
+                        <div className="intro-container">
                         {(companyInfo["intro"] && companyInfo["intro"] !== "") &&
                             <p className="company-intro">
                                 {ticker && currDisplay && companyInfo["intro"]}
                             </p>
                         }
+                        </div>
                     </div>
+
+
+
 
                     <div className="summary-container">
                         <AnimatePresence>

@@ -13,14 +13,14 @@ if OPENAI_API_KEY:
     client_openai = AsyncOpenAI(api_key=OPENAI_API_KEY)
 
 @router.get("/intro", response_class=PlainTextResponse)
-async def get_intro(ticker: str):
+async def get_intro(name: str):
     if not client_openai:
         return "OpenAI client not configured."
         
     response = await client_openai.chat.completions.create(
         model="gpt-4o-mini", 
         messages=[
-            {"role": "user", "content": f"Write a short introduction (max 30 words, neutral) for the company with ticker: {ticker}. Output only the plain text paragraph."}
+            {"role": "user", "content": f"30-word max neutral intro for investors. {name}."}
         ]
     )
     return response.choices[0].message.content.strip()

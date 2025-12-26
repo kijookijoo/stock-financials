@@ -20,7 +20,7 @@ async def get_intro(name: str):
     response = await client_openai.chat.completions.create(
         model="gpt-4o-mini", 
         messages=[
-            {"role": "user", "content": f"30-word max neutral intro for investors. {name}."}
+            {"role": "user", "content": f"Objective/Neutral: 30-word max neutral intro for investors. {name}."}
         ]
     )
     return response.choices[0].message.content.strip()

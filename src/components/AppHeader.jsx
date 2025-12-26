@@ -7,16 +7,19 @@ export function AppHeader() {
 
 
     function handleInput(event) {
-        setInputText(event.currentTarget.value.toUpperCase());
+        if (event.currentTarget.value.length <= 4) {
+            setInputText(event.currentTarget.value.toUpperCase());
+        }
     }
 
-    function handleSearch() {
+    function handleSearch(event) {
+        if (event) event.preventDefault();
         navigate(`/financials?ticker=${inputText}`);
     }
 
     function handleKeyDown(event) {
         if (event.key == "Enter") {
-            handleSearch();
+            handleSearch(event);
         }
     }
 
@@ -26,28 +29,31 @@ export function AppHeader() {
 
                 <div className='items-left'>
 
-                    <input className='ticker-input'
-                        placeholder="Enter ticker here..."
-                        type='text'
-                        value={inputText}
-                        onChange={handleInput}
-                        onKeyDown={handleKeyDown}
-                    />
+                    {/* <input className='ticker-input'
+                        type=''
+                        
+                        
+                        
+                    /> */}
 
-                    <button className='search-button' onClick={handleSearch}>
-                        <img src='/images/search-icon.png' />
-                    </button>
+                    <form className="d-flex my-2 my-lg-0" onSubmit={handleSearch}>
+                        <input className="form-control me-2"
+                            type="text"
+                            placeholder="Enter ticker here..."
+                            aria-label="text"
+                            onKeyDown={handleKeyDown}
+                            onChange={handleInput}
+                            value={inputText} />
+
+                        <button className="btn btn-outline-success my-2 my-sm-0" onClick={handleSearch} type="submit">Search</button>
+                    </form>
+
 
                 </div>
 
                 <div className="items-right">
                     <Link className='navbar-item' to='/'>
                         Home
-                    </Link>
-
-                    <Link className='navbar-item' to='/financials'>
-                        Search Financials
-
                     </Link>
 
                     <Link className='navbar-item' to='/earnings'>

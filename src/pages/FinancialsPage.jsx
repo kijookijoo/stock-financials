@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router";
+import { ClipLoader } from "react-spinners";
 import './FinancialsPage.css'
 import { motion, AnimatePresence } from "motion/react";
 
@@ -87,66 +88,72 @@ export function FinancialsPage() {
                 {ticker && !currDisplay && <div style={{ color: 'white' }}>Loading data for {ticker}...</div>}
 
                 <div className="reports-container">
-                    <div className="info-container">
-                        <div className="profile-container">
-                            {(companyInfo["image"] && companyInfo["image"] !== "") &&
-                                <div className="logo-wrapper">
-                                    {ticker && currDisplay && <img className="company-logo" src={companyInfo["image"]} />}
-                                </div>
-                            }
+                    {currDisplay ? (
+                        <div className="info-container">
+                            <div className="profile-container">
+                                {(companyInfo["image"] && companyInfo["image"] !== "") &&
+                                    <div className="logo-wrapper">
+                                        {ticker && currDisplay && <img className="company-logo" src={companyInfo["image"]} />}
+                                    </div>
+                                }
 
-                            {(companyInfo["name"] && companyInfo["name"] !== "") && <div className="company-name">
-                                {ticker && currDisplay && <h1>{companyInfo["name"]}</h1>}
-                            </div>}
+                                {(companyInfo["name"] && companyInfo["name"] !== "") && <div className="company-name">
+                                    {ticker && currDisplay && <h1>{companyInfo["name"]}</h1>}
+                                </div>}
 
-                            <h4 className="company-ticker">
-                                {ticker && currDisplay && ("(" + ticker + ")")}
-                            </h4>
+                                <h4 className="company-ticker">
+                                    {ticker && currDisplay && ("(" + ticker + ")")}
+                                </h4>
+                            </div>
+
+                            <div className="intro-container">
+                                {(companyInfo["intro"] && companyInfo["intro"] !== "") &&
+                                    <p className="company-intro">
+                                        {ticker && currDisplay && companyInfo["intro"]}
+                                    </p>
+                                }
+                            </div>
                         </div>
-                        
-                        <div className="intro-container">
-                        {(companyInfo["intro"] && companyInfo["intro"] !== "") &&
-                            <p className="company-intro">
-                                {ticker && currDisplay && companyInfo["intro"]}
-                            </p>
-                        }
-                        </div>
-                    </div>
+                    ) : <ClipLoader
+                        color={"#ffffffff"} 
+                        size={50} 
+                        aria-label="Loading Spinner"
+                    />}
 
 
 
 
                     <div className="summary-container">
                         <AnimatePresence>
-                            <motion.button className="income-statement"
+                            {currDisplay && <motion.button className="income-statement"
                                 whileHover={{ scale: 1.1 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={() => changeStatementDisplay("incomeStatement")}
                             >
                                 <motion.img className="incomestatement-image" src='./images/incomestatement.png' />
-                            </motion.button>
+                            </motion.button>}
                         </AnimatePresence>
 
                         <AnimatePresence>
-                            <motion.button className="balance-sheet"
+                            {currDisplay && <motion.button className="balance-sheet"
                                 whileHover={{ scale: 1.1 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={() => changeStatementDisplay("balanceSheet")}
                             >
                                 <motion.img className="incomestatement-image" src='./images/balancesheet.png' />
 
-                            </motion.button>
+                            </motion.button>}
                         </AnimatePresence>
 
                         <AnimatePresence>
-                            <motion.button className="statement-cashflow"
+                            {currDisplay && <motion.button className="statement-cashflow"
                                 whileHover={{ scale: 1.1 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={() => changeStatementDisplay("cashFlowStatement")}
                             >
                                 <motion.img className="incomestatement-image" src='./images/cashflowstatement.png' />
 
-                            </motion.button>
+                            </motion.button>}
                         </AnimatePresence>
                     </div>
 
@@ -169,7 +176,7 @@ export function FinancialsPage() {
                     )}
 
                 </div>
-                2            </div >
+            </div >
         </>
     );
 }

@@ -1,5 +1,11 @@
 from fastapi import APIRouter
 import yfinance as yf
+import os
+
+# Configure yfinance to use /tmp for caching (crucial for Vercel/Serverless)
+if os.access("/tmp", os.W_OK):
+    yf.set_tz_cache_location("/tmp/yf_cache")
+
 import httpx
 import anyio
 

@@ -7,15 +7,13 @@ from dotenv import load_dotenv
 load_dotenv()
 router = APIRouter()
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-client_openai = None
-if OPENAI_API_KEY:
-    client_openai = AsyncOpenAI(api_key=OPENAI_API_KEY)
-
 @router.get("/intro", response_class=PlainTextResponse)
 async def get_intro(name: str):
-    if not client_openai:
-        return "OpenAI client not configured."
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        return "OpenAI client not configured (Missing Key)."
+    
+    client_openai = AsyncOpenAI(api_key=api_key)
         
     response = await client_openai.chat.completions.create(
         model="gpt-4o-mini", 

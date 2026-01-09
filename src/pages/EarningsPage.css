@@ -1,3 +1,5 @@
+/* EarningsPage.css */
+
 .earnings-container {
   padding: 2rem;
   max-width: 1400px;
@@ -25,11 +27,35 @@
   margin: 0;
 }
 
+.week-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 0.5rem;
+}
+
 .earnings-header h2 {
-  margin: 0.5rem 0 0;
   font-size: 1.1rem;
   font-weight: 400;
   color: #aaa;
+  margin: 0; /* Let flex gap handle spacing */
+}
+
+.nav-arrow {
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #e0e0e0;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.nav-arrow:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
 /* Use a grid layout similar to HomePage, but adapted for calendar columns */
@@ -43,7 +69,7 @@
 
 .day-column {
   flex: 1;
-  min-width: 200px; /* Ensure columns don't squish too much */
+  min-width: 250px; /* Increased from 200px to give sessions more room */
   background: rgba(255, 255, 255, 0.05); /* Dark theme translucent background */
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.05);
@@ -106,37 +132,48 @@
   text-align: center;
 }
 
-.company-card:hover {
-  transform: translateY(-2px);
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-.company-logo {
-  width: 32px;
-  height: 32px;
+.company-logo-earnings {
+  width: 48px; /* Slightly larger for emphasis */
+  height: 48px;
   object-fit: contain;
-  margin-bottom: 6px;
-  border-radius: 4px; 
-  background: white; 
-  padding: 2px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  background: rgb(201, 200, 200);
+  padding: 3px;
 }
 
 .company-logo-placeholder {
-  width: 32px;
-  height: 32px;
+  width: 48px;
+  height: 48px;
   background: #333;
-  border-radius: 4px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 10px;
   color: #aaa;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
-.company-symbol {
+.company-info-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.2;
+}
+
+.company-name {
   font-weight: 700;
-  font-size: 0.85rem;
-  color: #ddd;
+  font-size: 0.75rem;
+  color: #fff;
+  margin-bottom: 2px;
+
+  word-break: break-word;
+}
+
+.company-symbol-sub {
+  font-weight: 500;
+  font-size: 0.65rem;
+  color: #aaa; /* Subtitle: Grey */
+  text-transform: uppercase;
 }

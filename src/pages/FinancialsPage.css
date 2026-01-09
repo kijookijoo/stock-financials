@@ -133,13 +133,13 @@
 .info-container {
   display: flex;
   flex-direction: row;
-  align-items: top;
+  align-items: center; /* Fixed invalid 'top' */
   justify-content: center;
   text-align: center;
   background-color: white;
   width: 100vw;
-  padding: 40px 20px;
-  gap: 40px;
+  padding: 60px 40px;
+  gap: 80px; /* Increased gap for better spacing */
 }
 
 .profile-container {
@@ -188,9 +188,14 @@
 .company-name {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   font-weight: 400;
-  color: black;
+  color: #1a252f;
   margin-bottom: 15px;
   margin-top: 15px;
+}
+
+.company-name h1 {
+  color: #1a252f;
+  margin: 0;
 }
 
 .company-intro {

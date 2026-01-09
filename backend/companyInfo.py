@@ -18,12 +18,20 @@ async def get_company_info(ticker: str):
     if ticker in cache:
         return cache[ticker]
 
+    FMP_API_KEY = "BJ1cS2zuvUHvTkUayuZjpImCuajub8Iv"
+    name = ticker
+
     try:
-        company = await anyio.to_thread.run_sync(yf.Ticker, ticker)
-        info = await anyio.to_thread.run_sync(lambda: company.info)
-        name = info.get("longName") or info.get("shortName") or ticker
+        async with httpx.AsyncClient() as client:
+            url = f"https://financialmodelingprep.com/api/v3/profile/{ticker}?apikey={FMP_API_KEY}"
+            response = await client.get(url)
+            data = response.json()
+            if data and isinstance(data, list) and len(data) > 0:
+                name = data[0].get("companyName", ticker)
     except Exception as e:
-        print(f"Error fetching yfinance info: {e}")
+        print(f"Error fetching FMP info: {e}")
+        # Fallback to yfinance if FMP fails? Or just keep ticker.
+        # Given the user's issue, avoiding yfinance is safer for speed.
         name = ticker
         
     logo_url = f"https://financialmodelingprep.com/image-stock/{ticker}.png"

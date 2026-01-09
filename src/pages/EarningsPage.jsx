@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { startOfWeek, endOfWeek, addDays, format, isWeekend, addWeeks } from 'date-fns';
 import './EarningsPage.css';
 
@@ -6,7 +7,8 @@ export function EarningsPage() {
     const [earnings, setEarnings] = useState({});
     const [weekStart, setWeekStart] = useState(new Date());
     const [loading, setLoading] = useState(true);
-    let API_TOKEN = import.meta.env.API_TOKEN;
+    // Hardcoding token to ensure API access works across all weeks
+    const API_TOKEN = 'd5g6bn9r01qie3lgooogd5g6bn9r01qie3lgoop0';
 
     useEffect(() => {
         const today = new Date();
@@ -99,13 +101,29 @@ export function EarningsPage() {
         setEarnings(grouped);
     };
 
+    const handlePrevWeek = () => {
+        const newDate = addWeeks(weekStart, -1);
+        setWeekStart(newDate);
+        fetchEarnings(newDate);
+    };
+
+    const handleNextWeek = () => {
+        const newDate = addWeeks(weekStart, 1);
+        setWeekStart(newDate);
+        fetchEarnings(newDate);
+    };
+
     const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
     return (
         <div className="earnings-container">
             <header className="earnings-header">
                 <h1>Most Anticipated Earnings Releases</h1>
-                <h2>for the week beginning {format(weekStart, 'MMMM dd, yyyy')}</h2>
+                <div className="week-navigation">
+                    <button onClick={handlePrevWeek} className="nav-arrow">&lt;</button>
+                    <h2>for the week beginning {format(weekStart, 'MMMM dd, yyyy')}</h2>
+                    <button onClick={handleNextWeek} className="nav-arrow">&gt;</button>
+                </div>
             </header>
 
             <div className="calendar-grid">
@@ -141,20 +159,44 @@ export function EarningsPage() {
 }
 
 function CompanyCard({ company }) {
+    const navigate = useNavigate();
+    const [visible, setVisible] = useState(true);
+    const [companyName, setCompanyName] = useState(company.name || '');
     const logoUrl = `https://financialmodelingprep.com/image-stock/${company.symbol}.png`;
 
+    useEffect(() => {
+        // Fetch full company name from backend
+        if (!companyName || companyName === company.symbol) {
+            fetch(`http://127.0.0.1:8000/info?ticker=${company.symbol}`)
+                .then(res => res.json())
+                .then(data => {
+                    // Backend returns dict { name, image }
+                    if (data.name) {
+                        setCompanyName(data.name);
+                    }
+                })
+                .catch(err => console.error("Failed to fetch company name", err));
+        }
+    }, [company.symbol]);
+
+    if (!visible) return null;
+
     return (
-        <div className="company-card" title={`${company.symbol} - EPS Est: ${company.epsEstimate}`}>
+        <div
+            className="company-card"
+            title={`${companyName} (${company.symbol}) - EPS Est: ${company.epsEstimate}`}
+            onClick={() => navigate(`/financials?ticker=${company.symbol}`)}
+        >
             <img
                 src={logoUrl}
                 alt={company.symbol}
-                className="company-logo"
-                onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
+                className="company-logo-earnings"
+                onError={() => setVisible(false)}
             />
-            <div className="company-logo-placeholder" style={{ display: 'none' }}>
-                {company.symbol[0]}
+            <div className="company-info-block">
+                <div className="company-name">{companyName || company.symbol}</div>
+                <div className="company-symbol-sub">{company.symbol}</div>
             </div>
-            <div className="company-symbol">{company.symbol}</div>
         </div>
     );
 }

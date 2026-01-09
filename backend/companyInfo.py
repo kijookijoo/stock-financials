@@ -28,17 +28,16 @@ async def get_company_info(ticker: str):
             data = response.json()
             if data and isinstance(data, list) and len(data) > 0:
                 name = data[0].get("companyName", ticker)
+                logo_url = f"https://financialmodelingprep.com/image-stock/{ticker}.png"
+                result = {
+                    "name": name, 
+                    "image": logo_url
+                }
+                cache[ticker] = result
+                return result
+            else:
+                # Company not found in FMP database
+                return {"error": "not_found", "message": f"Company {ticker} not in database"}
     except Exception as e:
-        print(f"Error fetching FMP info: {e}")
-        # Fallback to yfinance if FMP fails? Or just keep ticker.
-        # Given the user's issue, avoiding yfinance is safer for speed.
-        name = ticker
-        
-    logo_url = f"https://financialmodelingprep.com/image-stock/{ticker}.png"
-    
-    result = {
-        "name": name, 
-        "image": logo_url
-    }
-    cache[ticker] = result
-    return result
+        # Silencing errors as requested - just return not_found
+        return {"error": "error", "message": str(e)}

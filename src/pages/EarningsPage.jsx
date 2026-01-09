@@ -10,6 +10,7 @@ export function EarningsPage() {
     // const API_TOKEN = import.meta.env.VITE_API_TOKEN;
 
     const API_TOKEN = 'd5g6bn9r01qie3lgooogd5g6bn9r01qie3lgoop0';
+
     useEffect(() => {
         const today = new Date();
         const start = isWeekend(today)
@@ -32,7 +33,6 @@ export function EarningsPage() {
             if (cached) {
                 const parsedCache = JSON.parse(cached);
                 if (parsedCache.date === todayStr && parsedCache.weekStart === weekStartStr) {
-                    console.log("Using cached earnings data");
                     processEarningsData(parsedCache.data, startDate);
                     setLoading(false);
                     return;
@@ -47,7 +47,6 @@ export function EarningsPage() {
 
             const response = await fetch(`https://finnhub.io/api/v1/calendar/earnings?from=${fromDate}&to=${toDate}&token=${API_TOKEN}`);
             const data = await response.json();
-            console.log("Fetched Earnings Data:", data);
 
             if (data && Array.isArray(data.earningsCalendar)) {
                 localStorage.setItem(cacheKey, JSON.stringify({
@@ -57,11 +56,9 @@ export function EarningsPage() {
                 }));
                 processEarningsData(data.earningsCalendar, startDate);
             } else {
-                console.error("Invalid data format", data);
                 processEarningsData([], startDate);
             }
         } catch (error) {
-            console.error("Failed to fetch earnings", error);
             processEarningsData([], startDate);
         } finally {
             setLoading(false);
@@ -165,21 +162,25 @@ function CompanyCard({ company }) {
     const logoUrl = `https://financialmodelingprep.com/image-stock/${company.symbol}.png`;
 
     useEffect(() => {
-        // Use environment variable for backend URL, default to port 8000
         const BACKEND_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
         const cleanURL = BACKEND_URL.endsWith('/') ? BACKEND_URL.slice(0, -1) : BACKEND_URL;
 
-        // Fetch full company name from backend
         if (!companyName || companyName === company.symbol) {
             fetch(`${cleanURL}/info?ticker=${company.symbol}`)
                 .then(res => res.json())
                 .then(data => {
-                    // Backend returns dict { name, image }
+                    // Check for backend 'not found' signal to avoid trying to load logo
+                    if (data.error) {
+                        setVisible(false);
+                        return;
+                    }
                     if (data.name) {
                         setCompanyName(data.name);
                     }
                 })
-                .catch(err => console.error("Failed to fetch company name", err));
+                .catch(() => {
+                    // Fail silently
+                });
         }
     }, [company.symbol]);
 

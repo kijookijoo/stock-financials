@@ -1,0 +1,142 @@
+.earnings-container {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  font-family: "Inter", sans-serif;
+  color: white;
+  height: auto;
+  min-height: 100vh;
+}
+
+.earnings-header {
+  margin-top: 10vh;
+  text-align: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.earnings-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #e0e0e0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0;
+}
+
+.earnings-header h2 {
+  margin: 0.5rem 0 0;
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: #aaa;
+}
+
+/* Use a grid layout similar to HomePage, but adapted for calendar columns */
+.calendar-grid {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 1rem;
+  overflow-x: auto; /* Allow horizontal scroll on very small screens */
+  width: 100%;
+}
+
+.day-column {
+  flex: 1;
+  min-width: 200px; /* Ensure columns don't squish too much */
+  background: rgba(255, 255, 255, 0.05); /* Dark theme translucent background */
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+}
+
+.day-header {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 1rem;
+  text-align: center;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.day-content {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+}
+
+.session-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px dashed rgba(255, 255, 255, 0.1);
+  padding: 0.5rem;
+}
+
+.session-column:last-child {
+  border-right: none;
+}
+
+.session-header {
+  text-align: center;
+  font-size: 0.75rem;
+  color: #888;
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.company-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  text-align: center;
+}
+
+.company-card:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.company-logo {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  margin-bottom: 6px;
+  border-radius: 4px; 
+  background: white; 
+  padding: 2px;
+}
+
+.company-logo-placeholder {
+  width: 32px;
+  height: 32px;
+  background: #333;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: #aaa;
+  margin-bottom: 6px;
+}
+
+.company-symbol {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #ddd;
+}

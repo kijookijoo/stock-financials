@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { startOfWeek, endOfWeek, addDays, format, isWeekend, addWeeks } from 'date-fns';
 import './EarningsPage.css';
 
@@ -7,8 +6,7 @@ export function EarningsPage() {
     const [earnings, setEarnings] = useState({});
     const [weekStart, setWeekStart] = useState(new Date());
     const [loading, setLoading] = useState(true);
-    // Hardcoding token to ensure API access works across all weeks
-    const VITE_API_TOKEN = 'd5g6bn9r01qie3lgooogd5g6bn9r01qie3lgoop0';
+    const API_TOKEN = import.meta.env.VITE_API_TOKEN;
 
     useEffect(() => {
         const today = new Date();
@@ -159,7 +157,6 @@ export function EarningsPage() {
 }
 
 function CompanyCard({ company }) {
-    const navigate = useNavigate();
     const [visible, setVisible] = useState(true);
     const [companyName, setCompanyName] = useState(company.name || '');
     const logoUrl = `https://financialmodelingprep.com/image-stock/${company.symbol}.png`;
@@ -182,11 +179,7 @@ function CompanyCard({ company }) {
     if (!visible) return null;
 
     return (
-        <div
-            className="company-card"
-            title={`${companyName} (${company.symbol}) - EPS Est: ${company.epsEstimate}`}
-            onClick={() => navigate(`/financials?ticker=${company.symbol}`)}
-        >
+        <div className="company-card" title={`${companyName} (${company.symbol}) - EPS Est: ${company.epsEstimate}`}>
             <img
                 src={logoUrl}
                 alt={company.symbol}

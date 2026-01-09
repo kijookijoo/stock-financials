@@ -5,7 +5,7 @@ import './FinancialsPage.css'
 import { motion, AnimatePresence } from "motion/react";
 
 export function FinancialsPage() {
-    let URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8004"; if (URL.endsWith('/')) {
+    let URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000"; if (URL.endsWith('/')) {
         URL = URL.slice(0, -1);
     }
 
@@ -33,25 +33,47 @@ export function FinancialsPage() {
     async function fetchData(tickerSymbol) {
         if (!tickerSymbol) return;
         setIsLoading(true);
+        setCurrDisplay(false);
 
         try {
             const [infoResult, financialsResult] = await Promise.all([
-                fetch(`${URL}/info?ticker=${tickerSymbol}`).then(res => res.json()),
-                fetch(`${URL}/financials?ticker=${tickerSymbol}`).then(res => res.json())
+                fetch(`${URL}/info?ticker=${tickerSymbol}`).then(res => res.json()).catch(e => ({ error: e.message, name: tickerSymbol })),
+                fetch(`${URL}/financials?ticker=${tickerSymbol}`).then(res => res.json()).catch(e => ({}))
             ]);
 
-            const [introResult] = await Promise.all([
-                fetch(`${URL}/intro?name=${infoResult["name"]}`).then(res => res.text()),
-            ]);
+            // Try to get intro, but don't fail everything if it doesn't work
+            let introText = "";
+            try {
+                const introResponse = await fetch(`${URL}/intro?name=${infoResult.name || tickerSymbol}`);
+                if (introResponse.ok) {
+                    introText = await introResponse.text();
+                    introText = introText.replace(/^"|"$/g, '');
+                }
+            } catch (e) {
+                console.warn("Intro fetch failed", e);
+            }
 
-            const companyData = { ...infoResult, intro: introResult.replace(/^"|"$/g, '') };
+            const companyData = {
+                name: infoResult.name || tickerSymbol,
+                image: infoResult.image || `https://financialmodelingprep.com/image-stock/${tickerSymbol}.png`,
+                intro: introText,
+                ...infoResult
+            };
 
             if (companyData.image) {
-                await new Promise((resolve) => {
-                    const img = new Image();
-                    img.src = companyData.image;
-                    img.onload = resolve;
-                });
+                try {
+                    await Promise.race([
+                        new Promise((resolve, reject) => {
+                            const img = new Image();
+                            img.src = companyData.image;
+                            img.onload = resolve;
+                            img.onerror = reject;
+                        }),
+                        new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 2000))
+                    ]);
+                } catch (e) {
+                    // Silently fail logo preload
+                }
             }
 
             setCompanyInfo(companyData);
@@ -59,10 +81,10 @@ export function FinancialsPage() {
             setCurrDisplay(true);
 
         } catch (error) {
-            console.error("Error fetching data:", error);
+            console.error("Critical error in fetchData:", error);
+            setCompanyInfo({ name: tickerSymbol, image: `https://financialmodelingprep.com/image-stock/${tickerSymbol}.png` });
             setStatements({});
-            setCompanyInfo({});
-            setCurrDisplay(false);
+            setCurrDisplay(true);
         } finally {
             setIsLoading(false);
         }
@@ -115,8 +137,8 @@ export function FinancialsPage() {
                             </div>
                         </div>
                     ) : <ClipLoader
-                        color={"#ffffffff"} 
-                        size={50} 
+                        color={"#ffffffff"}
+                        size={50}
                         aria-label="Loading Spinner"
                     />}
 

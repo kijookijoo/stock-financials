@@ -56,9 +56,11 @@ export function EarningsPage() {
                 }));
                 processEarningsData(data.earningsCalendar, startDate);
             } else {
+                console.error("Invalid data format", data);
                 processEarningsData([], startDate);
             }
         } catch (error) {
+            console.error("Failed to fetch earnings", error);
             processEarningsData([], startDate);
         } finally {
             setLoading(false);
@@ -157,23 +159,20 @@ export function EarningsPage() {
 
 function CompanyCard({ company }) {
     const navigate = useNavigate();
-    const [visible, setVisible] = useState(true);
     const [companyName, setCompanyName] = useState(company.name || '');
+    const [imageError, setImageError] = useState(false);
     const logoUrl = `https://financialmodelingprep.com/image-stock/${company.symbol}.png`;
 
     useEffect(() => {
         const BACKEND_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
         const cleanURL = BACKEND_URL.endsWith('/') ? BACKEND_URL.slice(0, -1) : BACKEND_URL;
 
+        // Fetch full company name from backend
         if (!companyName || companyName === company.symbol) {
             fetch(`${cleanURL}/info?ticker=${company.symbol}`)
                 .then(res => res.json())
                 .then(data => {
-                    // Check for backend 'not found' signal to avoid trying to load logo
-                    if (data.error) {
-                        setVisible(false);
-                        return;
-                    }
+                    // Backend returns dict { name, image }
                     if (data.name) {
                         setCompanyName(data.name);
                     }
@@ -184,20 +183,24 @@ function CompanyCard({ company }) {
         }
     }, [company.symbol]);
 
-    if (!visible) return null;
-
     return (
         <div
             className="company-card"
             title={`${companyName} (${company.symbol}) - EPS Est: ${company.epsEstimate}`}
             onClick={() => navigate(`/financials?ticker=${company.symbol}`)}
         >
-            <img
-                src={logoUrl}
-                alt={company.symbol}
-                className="company-logo-earnings"
-                onError={() => setVisible(false)}
-            />
+            {!imageError ? (
+                <img
+                    src={logoUrl}
+                    alt={company.symbol}
+                    className="company-logo-earnings"
+                    onError={() => setImageError(true)}
+                />
+            ) : (
+                <div className="company-logo-placeholder">
+                    {company.symbol}
+                </div>
+            )}
             <div className="company-info-block">
                 <div className="company-name">{companyName || company.symbol}</div>
                 <div className="company-symbol-sub">{company.symbol}</div>

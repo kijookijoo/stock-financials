@@ -19,25 +19,31 @@ async def get_company_info(ticker: str):
         return cache[ticker]
 
     FMP_API_KEY = "BJ1cS2zuvUHvTkUayuZjpImCuajub8Iv"
+    
+    # Default fallbacks
     name = ticker
+    logo_url = f"https://financialmodelingprep.com/image-stock/{ticker}.png"
 
     try:
         async with httpx.AsyncClient() as client:
             url = f"https://financialmodelingprep.com/api/v3/profile/{ticker}?apikey={FMP_API_KEY}"
             response = await client.get(url)
             data = response.json()
+            
             if data and isinstance(data, list) and len(data) > 0:
                 name = data[0].get("companyName", ticker)
-                logo_url = f"https://financialmodelingprep.com/image-stock/{ticker}.png"
-                result = {
-                    "name": name, 
-                    "image": logo_url
-                }
-                cache[ticker] = result
-                return result
-            else:
-                # Company not found in FMP database
-                return {"error": "not_found", "message": f"Company {ticker} not in database"}
+                logo_url = data[0].get("image") or logo_url
+                
+            result = {
+                "name": name, 
+                "image": logo_url
+            }
+            cache[ticker] = result
+            return result
+                
     except Exception as e:
-        # Silencing errors as requested - just return not_found
-        return {"error": "error", "message": str(e)}
+        # Always return fallback data so frontend can show the card
+        return {
+            "name": name,
+            "image": logo_url
+        }

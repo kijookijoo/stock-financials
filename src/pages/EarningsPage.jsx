@@ -8,7 +8,7 @@ export function EarningsPage() {
     const [weekStart, setWeekStart] = useState(new Date());
     const [loading, setLoading] = useState(true);
     // Hardcoding token to ensure API access works across all weeks
-    const API_TOKEN = 'd5g6bn9r01qie3lgooogd5g6bn9r01qie3lgoop0';
+    const VITE_API_TOKEN = 'd5g6bn9r01qie3lgooogd5g6bn9r01qie3lgoop0';
 
     useEffect(() => {
         const today = new Date();

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { startOfWeek, endOfWeek, addDays, format, isWeekend, addWeeks } from 'date-fns';
 import './EarningsPage.css';
 
@@ -6,8 +7,9 @@ export function EarningsPage() {
     const [earnings, setEarnings] = useState({});
     const [weekStart, setWeekStart] = useState(new Date());
     const [loading, setLoading] = useState(true);
-    const API_TOKEN = import.meta.env.VITE_API_TOKEN;
+    // const API_TOKEN = import.meta.env.VITE_API_TOKEN;
 
+    const API_TOKEN = 'd5g6bn9r01qie3lgooogd5g6bn9r01qie3lgoop0';
     useEffect(() => {
         const today = new Date();
         const start = isWeekend(today)
@@ -157,14 +159,19 @@ export function EarningsPage() {
 }
 
 function CompanyCard({ company }) {
+    const navigate = useNavigate();
     const [visible, setVisible] = useState(true);
     const [companyName, setCompanyName] = useState(company.name || '');
     const logoUrl = `https://financialmodelingprep.com/image-stock/${company.symbol}.png`;
 
     useEffect(() => {
+        // Use environment variable for backend URL, default to port 8000
+        const BACKEND_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+        const cleanURL = BACKEND_URL.endsWith('/') ? BACKEND_URL.slice(0, -1) : BACKEND_URL;
+
         // Fetch full company name from backend
         if (!companyName || companyName === company.symbol) {
-            fetch(`http://127.0.0.1:8000/info?ticker=${company.symbol}`)
+            fetch(`${cleanURL}/info?ticker=${company.symbol}`)
                 .then(res => res.json())
                 .then(data => {
                     // Backend returns dict { name, image }
@@ -179,7 +186,11 @@ function CompanyCard({ company }) {
     if (!visible) return null;
 
     return (
-        <div className="company-card" title={`${companyName} (${company.symbol}) - EPS Est: ${company.epsEstimate}`}>
+        <div
+            className="company-card"
+            title={`${companyName} (${company.symbol}) - EPS Est: ${company.epsEstimate}`}
+            onClick={() => navigate(`/financials?ticker=${company.symbol}`)}
+        >
             <img
                 src={logoUrl}
                 alt={company.symbol}

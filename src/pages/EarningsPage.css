@@ -58,19 +58,18 @@
   border-color: rgba(255, 255, 255, 0.4);
 }
 
-/* Use a grid layout similar to HomePage, but adapted for calendar columns */
 .calendar-grid {
   display: flex;
   flex-wrap: nowrap;
   gap: 1rem;
-  overflow-x: auto; /* Allow horizontal scroll on very small screens */
+  overflow-x: auto;
   width: 100%;
 }
 
 .day-column {
   flex: 1;
-  min-width: 250px; /* Increased from 200px to give sessions more room */
-  background: rgba(255, 255, 255, 0.05); /* Dark theme translucent background */
+  min-width: 250px; 
+  background: rgba(255, 255, 255, 0.05); 
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);

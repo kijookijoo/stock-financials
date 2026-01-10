@@ -141,11 +141,6 @@ export function FinancialsPage() {
                                     </p>
                                 }
                             </div>
-                            <button onClick={() => {
-                                console.log(companyInfo);
-                            }}>
-                                HEEELOO WORLD
-                            </button>
 
                         </div>
                     ) : <ClipLoader

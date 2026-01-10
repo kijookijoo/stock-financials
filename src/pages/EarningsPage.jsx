@@ -155,32 +155,13 @@ export function EarningsPage() {
 
 function CompanyCard({ company }) {
     const navigate = useNavigate();
-    const [companyName, setCompanyName] = useState(company.name || '');
     const [imageError, setImageError] = useState(false);
     const logoUrl = `https://financialmodelingprep.com/image-stock/${company.symbol}.png`;
-
-    useEffect(() => {
-        const BACKEND_URL = import.meta.env.VITE_API_URL;
-        const cleanURL = BACKEND_URL.endsWith('/') ? BACKEND_URL.slice(0, -1) : BACKEND_URL;
-
-        if (!companyName || companyName === company.symbol) {
-            fetch(`${cleanURL}/info?ticker=${company.symbol}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.name) {
-                        setCompanyName(data.name);
-                    }
-                })
-                .catch(() => {
-                    // Fail silently
-                });
-        }
-    }, [company.symbol]);
 
     return (
         <div
             className="company-card"
-            title={`${companyName} (${company.symbol}) - EPS Est: ${company.epsEstimate}`}
+            title={`${company.symbol} - EPS Est: ${company.epsEstimate}`}
             onClick={() => navigate(`/financials?ticker=${company.symbol}`)}
         >
             {!imageError && (
@@ -192,10 +173,7 @@ function CompanyCard({ company }) {
                 />
             )}
             <div className="company-info-block">
-                <div className="company-name">{companyName || company.symbol}</div>
-                {companyName && companyName !== company.symbol && (
-                    <div className="company-symbol-sub">{company.symbol}</div>
-                )}
+                <div className="company-name">{company.symbol}</div>
             </div>
         </div>
     );

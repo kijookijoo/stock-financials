@@ -10,6 +10,7 @@ import anyio
 
 router = APIRouter()
 
+# Cache for company info to avoid repeated API calls
 cache = {}
 
 @router.get("/info")

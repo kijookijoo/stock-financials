@@ -93,8 +93,9 @@ export function HomePage() {
                                     onError={(e) => { e.target.style.display = 'none'; }}
                                 />
                             </div>
-                            <span className="card-ticker">{company.ticker}</span>
                             <span className="card-name">{company.name}</span>
+                            <span className="card-ticker">{company.ticker}</span>
+    
                         </motion.div>
                     ))}
                 </div>
@@ -127,8 +128,8 @@ export function HomePage() {
                                     onError={(e) => { e.target.style.display = 'none'; }}
                                 />
                             </div>
-                            <span className="card-ticker">{company.ticker}</span>
                             <span className="card-name">{company.name}</span>
+                            <span className="card-ticker">{company.ticker}</span>
                         </motion.div>
                     ))}
                 </div>
@@ -163,8 +164,8 @@ export function HomePage() {
                                     onError={(e) => { e.target.style.display = 'none'; }}
                                 />
                             </div>
-                            <span className="card-ticker">{company.ticker}</span>
                             <span className="card-name">{company.name}</span>
+                            <span className="card-ticker">{company.ticker}</span>
                         </motion.div>
                     ))}
                 </div>
@@ -199,8 +200,8 @@ export function HomePage() {
                                     onError={(e) => { e.target.style.display = 'none'; }}
                                 />
                             </div>
-                            <span className="card-ticker">{company.ticker}</span>
                             <span className="card-name">{company.name}</span>
+                            <span className="card-ticker">{company.ticker}</span>
                         </motion.div>
                     ))}
                 </div>

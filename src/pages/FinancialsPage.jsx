@@ -65,8 +65,6 @@ export function FinancialsPage() {
                 ...infoResult
             };
 
-            console.log("Final companyData:", companyData);
-
             if (companyData.image) {
                 try {
                     await Promise.race([

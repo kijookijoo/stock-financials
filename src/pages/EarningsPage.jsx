@@ -7,9 +7,7 @@ export function EarningsPage() {
     const [earnings, setEarnings] = useState({});
     const [weekStart, setWeekStart] = useState(new Date());
     const [loading, setLoading] = useState(true);
-    // const API_TOKEN = import.meta.env.VITE_API_TOKEN;
-
-    const API_TOKEN = 'd5g6bn9r01qie3lgooogd5g6bn9r01qie3lgoop0';
+    const API_TOKEN = import.meta.env.VITE_API_TOKEN;
 
     useEffect(() => {
         const today = new Date();

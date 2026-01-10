@@ -16,9 +16,8 @@ router = APIRouter()
 async def get_company_info(ticker: str):
     ticker = ticker.upper()
 
-    FMP_API_KEY = "BJ1cS2zuvUHvTkUayuZjpImCuajub8Iv"
+    FMP_API_KEY = "2aYhVupMkAuJ8yqcYQ2nx47sracCECRm"
     
-    # Default fallbacks
     name = ticker
     logo_url = f"https://financialmodelingprep.com/image-stock/{ticker}.png"
     
@@ -40,7 +39,6 @@ async def get_company_info(ticker: str):
             return result
                 
     except Exception as e:
-        # Always return fallback data so frontend can show the card
         return {
             "name": name,
             "image": logo_url

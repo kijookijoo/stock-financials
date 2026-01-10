@@ -56,11 +56,9 @@ export function EarningsPage() {
                 }));
                 processEarningsData(data.earningsCalendar, startDate);
             } else {
-                console.error("Invalid data format", data);
                 processEarningsData([], startDate);
             }
         } catch (error) {
-            console.error("Failed to fetch earnings", error);
             processEarningsData([], startDate);
         } finally {
             setLoading(false);
@@ -167,12 +165,10 @@ function CompanyCard({ company }) {
         const BACKEND_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
         const cleanURL = BACKEND_URL.endsWith('/') ? BACKEND_URL.slice(0, -1) : BACKEND_URL;
 
-        // Fetch full company name from backend
         if (!companyName || companyName === company.symbol) {
             fetch(`${cleanURL}/info?ticker=${company.symbol}`)
                 .then(res => res.json())
                 .then(data => {
-                    // Backend returns dict { name, image }
                     if (data.name) {
                         setCompanyName(data.name);
                     }
@@ -189,21 +185,19 @@ function CompanyCard({ company }) {
             title={`${companyName} (${company.symbol}) - EPS Est: ${company.epsEstimate}`}
             onClick={() => navigate(`/financials?ticker=${company.symbol}`)}
         >
-            {!imageError ? (
+            {!imageError && (
                 <img
                     src={logoUrl}
                     alt={company.symbol}
                     className="company-logo-earnings"
                     onError={() => setImageError(true)}
                 />
-            ) : (
-                <div className="company-logo-placeholder">
-                    {company.symbol}
-                </div>
             )}
             <div className="company-info-block">
                 <div className="company-name">{companyName || company.symbol}</div>
-                <div className="company-symbol-sub">{company.symbol}</div>
+                {companyName && companyName !== company.symbol && (
+                    <div className="company-symbol-sub">{company.symbol}</div>
+                )}
             </div>
         </div>
     );

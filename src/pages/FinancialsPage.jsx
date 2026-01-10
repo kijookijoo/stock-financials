@@ -36,15 +36,19 @@ export function FinancialsPage() {
         setCurrDisplay(false);
 
         try {
+            console.log("Fetching data for ticker:", tickerSymbol);
+            console.log("API URL:", `${URL}/info?ticker=${tickerSymbol}`);
+
             const [infoResult, financialsResult] = await Promise.all([
-                fetch(`${URL}/info?ticker=${tickerSymbol}`).then(res => res.json()).catch(e => ({ error: e.message, name: tickerSymbol })),
-                fetch(`${URL}/financials?ticker=${tickerSymbol}`).then(res => res.json()).catch(e => ({}))
+                fetch(`${URL}/info?ticker=${tickerSymbol}`).then(res => res.json()),
+                fetch(`${URL}/financials?ticker=${tickerSymbol}`).then(res => res.json()).catch(() => ({}))
             ]);
 
-            // Try to get intro, but don't fail everything if it doesn't work
+            console.log("Raw infoResult from API:", infoResult);
+
             let introText = "";
             try {
-                const introResponse = await fetch(`${URL}/intro?name=${infoResult.name || tickerSymbol}`);
+                const introResponse = await fetch(`${URL}/intro?name=${infoResult.name}`);
                 if (introResponse.ok) {
                     introText = await introResponse.text();
                     introText = introText.replace(/^"|"$/g, '');
@@ -53,12 +57,15 @@ export function FinancialsPage() {
                 console.warn("Intro fetch failed", e);
             }
 
+
             const companyData = {
-                name: infoResult.name || tickerSymbol,
-                image: infoResult.image || `https://financialmodelingprep.com/image-stock/${tickerSymbol}.png`,
+                name: infoResult.name,
+                image: infoResult.image,
                 intro: introText,
                 ...infoResult
             };
+
+            console.log("Final companyData:", companyData);
 
             if (companyData.image) {
                 try {
@@ -71,18 +78,17 @@ export function FinancialsPage() {
                         }),
                         new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 2000))
                     ]);
-                } catch (e) {
-                    // Silently fail logo preload
-                }
+                } catch (e) { }
             }
 
             setCompanyInfo(companyData);
+
             setStatements(financialsResult);
             setCurrDisplay(true);
 
         } catch (error) {
             console.error("Critical error in fetchData:", error);
-            setCompanyInfo({ name: tickerSymbol, image: `https://financialmodelingprep.com/image-stock/${tickerSymbol}.png` });
+            setCompanyInfo({ name: tickerSymbol });
             setStatements({});
             setCurrDisplay(true);
         } finally {
@@ -135,6 +141,12 @@ export function FinancialsPage() {
                                     </p>
                                 }
                             </div>
+                            <button onClick={() => {
+                                console.log(companyInfo);
+                            }}>
+                                HEEELOO WORLD
+                            </button>
+
                         </div>
                     ) : <ClipLoader
                         color={"#ffffffff"}

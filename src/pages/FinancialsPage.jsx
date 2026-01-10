@@ -5,7 +5,7 @@ import './FinancialsPage.css'
 import { motion, AnimatePresence } from "motion/react";
 
 export function FinancialsPage() {
-    let URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000"; if (URL.endsWith('/')) {
+    let URL = import.meta.env.VITE_API_URL; if (URL.endsWith('/')) {
         URL = URL.slice(0, -1);
     }
 

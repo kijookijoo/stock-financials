@@ -162,7 +162,7 @@ function CompanyCard({ company }) {
     const logoUrl = `https://financialmodelingprep.com/image-stock/${company.symbol}.png`;
 
     useEffect(() => {
-        const BACKEND_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+        const BACKEND_URL = import.meta.env.VITE_API_URL;
         const cleanURL = BACKEND_URL.endsWith('/') ? BACKEND_URL.slice(0, -1) : BACKEND_URL;
 
         if (!companyName || companyName === company.symbol) {

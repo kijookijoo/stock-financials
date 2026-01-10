@@ -10,15 +10,11 @@ import anyio
 
 router = APIRouter()
 
-# Cache for company info to avoid repeated API calls
-cache = {}
+
 
 @router.get("/info")
 async def get_company_info(ticker: str):
     ticker = ticker.upper()
-    if ticker in cache:
-        print(f"CACHE HIT for {ticker}: {cache[ticker]}")  # Debug log
-        return cache[ticker]
 
     FMP_API_KEY = "BJ1cS2zuvUHvTkUayuZjpImCuajub8Iv"
     
@@ -48,7 +44,6 @@ async def get_company_info(ticker: str):
                 "name": name, 
                 "image": logo_url
             }
-            cache[ticker] = result
             print(f"Returning result: {result}")  # Debug log
             return result
                 

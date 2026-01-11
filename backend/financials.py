@@ -16,15 +16,57 @@ HEADERS = {
     "Host": "www.sec.gov"
 }
 
-def getFinancialStatementType(fileName):
-    fileName_lower = fileName.lower()
-    if any(term in fileName_lower for term in ["income statement", "operations", "comprehensive loss", "comprehensive income"]):
-        return "incomeStatement"
-    if any(term in fileName_lower for term in ["balance sheet", "financial position"]):
-        return "balanceSheet"
-    if "cash flow" in fileName_lower:
-        return "cashFlowStatement"
-    return None
+def get_statement_priority(short_name):
+    """
+    Returns (statement_type, score) based on the report's short name.
+    Higher score means higher priority.
+    """
+    name = short_name.lower()
+    
+    # Keywords that usually indicate we should SKIP this report
+    exclude_keywords = [
+        "(parenthetical)", 
+        "parenthetical",
+        "detailed", 
+        "details", 
+        "disclosure", 
+        "note", 
+        "accounting policies",
+        "schedule",
+        "tables"
+    ]
+    if any(word in name for word in exclude_keywords):
+        return None, 0
+
+    doc_type = None
+    score = 0
+    
+    # INCOME STATEMENT detection
+    if any(term in name for term in ["income statement", "operations", "comprehensive loss", "comprehensive income", "statement of earnings"]):
+        doc_type = "incomeStatement"
+        score = 10
+        # "Consolidated" is a strong indicator of the primary statement
+        if "consolidated" in name:
+            score += 5
+        # "Condensed" is expected in 10-Qs but slightly less priority than a full consolidated if both exist
+        if "condensed" in name:
+            score -= 1
+            
+    # BALANCE SHEET detection
+    elif any(term in name for term in ["balance sheet", "financial position"]):
+        doc_type = "balanceSheet"
+        score = 10
+        if "consolidated" in name:
+            score += 5
+            
+    # CASH FLOW detection
+    elif "cash flow" in name:
+        doc_type = "cashFlowStatement"
+        score = 10
+        if "consolidated" in name:
+            score += 5
+
+    return doc_type, score
 
 def parse_sec_number(text):
     if not text: return None
@@ -139,24 +181,35 @@ async def read_financials(ticker : str):
             soup_xml = BeautifulSoup(summary_res.text, "xml")
             reports = soup_xml.find_all("Report")
             
-            tasks = []
+            # 1. Identify best candidates for each statement type
+            best_candidates = {
+                "balanceSheet": {"url": None, "score": -1},
+                "incomeStatement": {"url": None, "score": -1},
+                "cashFlowStatement": {"url": None, "score": -1}
+            }
+            
             for report in reports:
                 short_name_tag = report.find("ShortName")
-                if not short_name_tag: continue
+                if not short_name_tag: 
+                    continue
                 
-                docType = getFinancialStatementType(short_name_tag.text)
-                if docType is None: continue
-                if financial_statements[docType] != "": continue # already found one
-                
-                html_file = report.find("HtmlFileName")
-                if html_file:
-                    file_url = base_url + html_file.text
-                    tasks.append(fetch_statement(client, file_url, docType))
+                docType, score = get_statement_priority(short_name_tag.text)
+                if docType and score > best_candidates[docType]["score"]:
+                    html_file = report.find("HtmlFileName")
+                    if html_file:
+                        best_candidates[docType]["url"] = base_url + html_file.text
+                        best_candidates[docType]["score"] = score
+            
+            # 2. Fetch the best candidates concurrently
+            tasks = []
+            for docType, info in best_candidates.items():
+                if info["url"]:
+                    tasks.append(fetch_statement(client, info["url"], docType))
             
             if tasks:
                 results = await asyncio.gather(*tasks)
                 for docType, content in results:
-                    if content: # only set if not empty
+                    if content:
                         financial_statements[docType] = content
                         
         return financial_statements

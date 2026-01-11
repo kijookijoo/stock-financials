@@ -26,7 +26,6 @@ export function EarningsPage() {
         const cacheKey = 'finnhub_earnings_cache';
 
         try {
-            // Check cache
             const cached = localStorage.getItem(cacheKey);
             if (cached) {
                 const parsedCache = JSON.parse(cached);
@@ -158,20 +157,20 @@ function CompanyCard({ company }) {
     const [imageError, setImageError] = useState(false);
     const logoUrl = `https://financialmodelingprep.com/image-stock/${company.symbol}.png`;
 
+    if (imageError) return null;
+
     return (
         <div
             className="company-card"
             title={`${company.symbol} - EPS Est: ${company.epsEstimate}`}
             onClick={() => navigate(`/financials?ticker=${company.symbol}`)}
         >
-            {!imageError && (
-                <img
-                    src={logoUrl}
-                    alt={company.symbol}
-                    className="company-logo-earnings"
-                    onError={() => setImageError(true)}
-                />
-            )}
+            <img
+                src={logoUrl}
+                alt={company.symbol}
+                className="company-logo-earnings"
+                onError={() => setImageError(true)}
+            />
             <div className="company-info-block">
                 <div className="company-name">{company.symbol}</div>
             </div>

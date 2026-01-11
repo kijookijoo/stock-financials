@@ -12,8 +12,9 @@ export function HomePage() {
         { ticker: 'GOOGL', name: 'Alphabet' },
         { ticker: 'AMZN', name: 'Amazon' },
         { ticker: 'NVDA', name: 'NVIDIA' },
-        { ticker: 'TSLA', name: 'Tesla' },
+        // { ticker: 'TSLA', name: 'Tesla' },
         { ticker: 'META', name: 'Meta' },
+        { ticker: 'PLTR', name: 'Palantir'}
     ];
 
     const financeGiants = [
@@ -84,7 +85,7 @@ export function HomePage() {
                         >
                             <div
                                 className="card-logo-wrapper"
-                                style={company.ticker === 'AMZN' ? { background: 'black' } : {}}
+                                style={company.ticker === 'AMZN' || company.ticker === 'PLTR' ? { background: 'black' } : {}}
                             >
                                 <img
                                     src={`https://financialmodelingprep.com/image-stock/${company.ticker}.png`}

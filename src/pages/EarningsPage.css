@@ -1,7 +1,7 @@
 /* EarningsPage.css */
 
 .earnings-container {
-  padding: 1rem 2rem;
+  padding: 2rem;
   max-width: 1400px;
   margin: 0 auto;
   font-family: "Inter", sans-serif;
@@ -11,9 +11,9 @@
 }
 
 .earnings-header {
-  margin-top: 8vh;
+  margin-top: 10vh;
   text-align: center;
-  margin-bottom: 1rem;
+  margin-bottom: 2rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
@@ -61,7 +61,7 @@
 .calendar-grid {
   display: flex;
   flex-wrap: nowrap;
-  gap: 0.5rem;
+  gap: 1rem;
   overflow-x: auto;
   width: 100%;
 }
@@ -78,7 +78,7 @@
 }
 
 .day-header {
-  background: rgba(255, 255, 255, 0.1);
+  background: #ff7900;
   padding: 1rem;
   text-align: center;
   font-weight: 700;
@@ -100,7 +100,7 @@
   display: flex;
   flex-direction: column;
   border-right: 1px dashed rgba(255, 255, 255, 0.1);
-  padding: 0.25rem;
+  padding: 0.5rem;
 }
 
 .session-column:last-child {
@@ -109,9 +109,9 @@
 
 .session-header {
   text-align: center;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   color: #888;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   font-weight: 600;
@@ -121,11 +121,11 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0.4rem;
-  margin-bottom: 0.35rem;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid transparent;
+  background: #1a252f;
+  border: 1px solid rgba(255, 255, 255, 0.05);
   transition: all 0.2s ease;
   cursor: pointer;
   text-align: center;

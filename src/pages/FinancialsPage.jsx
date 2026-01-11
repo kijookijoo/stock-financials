@@ -36,15 +36,10 @@ export function FinancialsPage() {
         setCurrDisplay(false);
 
         try {
-            console.log("Fetching data for ticker:", tickerSymbol);
-            console.log("API URL:", `${URL}/info?ticker=${tickerSymbol}`);
-
             const [infoResult, financialsResult] = await Promise.all([
                 fetch(`${URL}/info?ticker=${tickerSymbol}`).then(res => res.json()),
                 fetch(`${URL}/financials?ticker=${tickerSymbol}`).then(res => res.json()).catch(() => ({}))
             ]);
-
-            console.log("Raw infoResult from API:", infoResult);
 
             let introText = "";
             try {

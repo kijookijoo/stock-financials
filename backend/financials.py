@@ -19,12 +19,11 @@ HEADERS = {
 def getFinancialStatementType(fileName):
     name = fileName.lower()
     
-    # Exclude non-full versions
-    exclude_terms = ["consolidated","condensed", "parenthetical", "detailed", "details", "disclosure", "note", "schedule"]
+    exclude_terms = ["condensed", "parenthetical", "detailed", "details", "disclosure", "note", "schedule", "supplemental"]
     if any(term in name for term in exclude_terms):
         return None
 
-    if any(term in name for term in ["income statement", "operations", "comprehensive loss", "comprehensive income", "statement of earnings"]):
+    if any(term in name for term in ["income statement", "operations", "statement of earnings", "comprehensive income"]):
         return "incomeStatement"
     if any(term in name for term in ["balance sheet", "financial position"]):
         return "balanceSheet"
@@ -127,14 +126,11 @@ async def read_financials(ticker : str):
         "cashFlowStatement" : ""
     }
     try:
-        # Search for both 10-K (Full) and 10-Q (Condensed)
-        # We'll check the 10-K first as it's the "Full" version
         metadatas = await anyio.to_thread.run_sync(
             dl.get_filing_metadatas,
             RequestedFilings(ticker_or_cik=ticker, form_type="10-K", limit=1)
         )
         
-        # If no 10-K found recently, fallback to 10-Q
         if not metadatas:
             metadatas = await anyio.to_thread.run_sync(
                 dl.get_filing_metadatas,
@@ -161,7 +157,7 @@ async def read_financials(ticker : str):
                 
                 docType = getFinancialStatementType(short_name_tag.text)
                 if docType is None: continue
-                if financial_statements[docType] != "": continue # already found one
+                if financial_statements[docType] != "": continue 
                 
                 html_file = report.find("HtmlFileName")
                 if html_file:
@@ -171,7 +167,7 @@ async def read_financials(ticker : str):
             if tasks:
                 results = await asyncio.gather(*tasks)
                 for docType, content in results:
-                    if content: # only set if not empty
+                    if content: 
                         financial_statements[docType] = content
                         
         return financial_statements

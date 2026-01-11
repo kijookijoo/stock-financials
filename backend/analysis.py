@@ -14,7 +14,6 @@ async def get_intro(name: str):
         if not api_key:
             return "Error: OpenAI client not configured (Missing OPENAI_API_KEY in Environment Variables)."
         
-        # Check if running in Vercel/Serverless and log it
         is_vercel = os.environ.get("VERCEL") == "1"
         
         client_openai = AsyncOpenAI(api_key=api_key)

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { startOfWeek, endOfWeek, addDays, format, isWeekend, addWeeks } from 'date-fns';
+import { ClipLoader } from "react-spinners";
+import { motion, AnimatePresence } from "motion/react";
 import './EarningsPage.css';
 
 export function EarningsPage() {
@@ -27,35 +29,54 @@ export function EarningsPage() {
 
         try {
             const cached = localStorage.getItem(cacheKey);
+            let earningsData = [];
+
             if (cached) {
                 const parsedCache = JSON.parse(cached);
                 if (parsedCache.date === todayStr && parsedCache.weekStart === weekStartStr) {
-                    processEarningsData(parsedCache.data, startDate);
-                    setLoading(false);
-                    return;
+                    earningsData = parsedCache.data;
                 }
             }
 
-            const endDate = endOfWeek(startDate, { weekStartsOn: 1 });
-            const friday = addDays(startDate, 4);
+            if (earningsData.length === 0) {
+                const endDate = endOfWeek(startDate, { weekStartsOn: 1 });
+                const friday = addDays(startDate, 4);
+                const fromDate = format(startDate, 'yyyy-MM-dd');
+                const toDate = format(friday, 'yyyy-MM-dd');
 
-            const fromDate = format(startDate, 'yyyy-MM-dd');
-            const toDate = format(friday, 'yyyy-MM-dd');
+                const response = await fetch(`https://finnhub.io/api/v1/calendar/earnings?from=${fromDate}&to=${toDate}&token=${API_TOKEN}`);
+                const data = await response.json();
 
-            const response = await fetch(`https://finnhub.io/api/v1/calendar/earnings?from=${fromDate}&to=${toDate}&token=${API_TOKEN}`);
-            const data = await response.json();
-
-            if (data && Array.isArray(data.earningsCalendar)) {
-                localStorage.setItem(cacheKey, JSON.stringify({
-                    date: todayStr,
-                    weekStart: weekStartStr,
-                    data: data.earningsCalendar
-                }));
-                processEarningsData(data.earningsCalendar, startDate);
-            } else {
-                processEarningsData([], startDate);
+                if (data && Array.isArray(data.earningsCalendar)) {
+                    earningsData = data.earningsCalendar;
+                    localStorage.setItem(cacheKey, JSON.stringify({
+                        date: todayStr,
+                        weekStart: weekStartStr,
+                        data: earningsData
+                    }));
+                }
             }
+
+            processEarningsData(earningsData, startDate);
+
+            // Preload top logos to ensure "until all images are loaded" effect
+            const topSymbols = earningsData
+                .sort((a, b) => (b.revenueEstimate || 0) - (a.revenueEstimate || 0))
+                .slice(0, 15) // Preload top 15 to balance speed and experience
+                .map(item => `https://financialmodelingprep.com/image-stock/${item.symbol}.png`);
+
+            await Promise.allSettled(topSymbols.map(src => {
+                return new Promise((resolve) => {
+                    const img = new Image();
+                    img.src = src;
+                    img.onload = resolve;
+                    img.onerror = resolve; // Resolve anyway to not block forever
+                    setTimeout(resolve, 2000); // Max wait 2s
+                });
+            }));
+
         } catch (error) {
+            console.error("Error fetching earnings:", error);
             processEarningsData([], startDate);
         } finally {
             setLoading(false);
@@ -109,6 +130,25 @@ export function EarningsPage() {
 
     const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.1
+            }
+        }
+    };
+
+    const itemVariants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: { duration: 0.5, ease: "easeOut" }
+        }
+    };
+
     return (
         <div className="earnings-container">
             <header className="earnings-header">
@@ -120,34 +160,43 @@ export function EarningsPage() {
                 </div>
             </header>
 
-            <div className="calendar-grid">
-                {days.map((dayName, index) => {
-                    const dateStr = format(addDays(weekStart, index), 'yyyy-MM-dd');
-                    const dayData = earnings[dateStr] || { bmo: [], amc: [] };
+            {loading ? (
+                <div className="loading-spinner-container">
+                    <ClipLoader color={"#ffffff"} size={50} />
+                </div>
+            ) : (
+                <motion.div
+                    className="calendar-grid"
+                    initial="hidden"
+                    animate="visible"
+                    variants={containerVariants}
+                >
+                    {days.map((dayName, index) => {
+                        const dateStr = format(addDays(weekStart, index), 'yyyy-MM-dd');
+                        const dayData = earnings[dateStr] || { bmo: [], amc: [] };
 
-                    return (
-                        <div key={dayName} className="day-column">
-                            <div className="day-header">{dayName}</div>
-                            <div className="day-content">
-                                {/* Before Open Column */}
-                                <div className="session-column">
-                                    <div className="session-header">Before Open</div>
-                                    {dayData.bmo.map((company, i) => (
-                                        <CompanyCard key={`${company.symbol}-${i}`} company={company} />
-                                    ))}
+                        return (
+                            <motion.div key={dayName} className="day-column" variants={itemVariants}>
+                                <div className="day-header">{dayName}</div>
+                                <div className="day-content">
+                                    <div className="session-column">
+                                        <div className="session-header">Before Open</div>
+                                        {dayData.bmo.map((company, i) => (
+                                            <CompanyCard key={`${company.symbol}-${i}`} company={company} />
+                                        ))}
+                                    </div>
+                                    <div className="session-column">
+                                        <div className="session-header">After Close</div>
+                                        {dayData.amc.map((company, i) => (
+                                            <CompanyCard key={`${company.symbol}-${i}`} company={company} />
+                                        ))}
+                                    </div>
                                 </div>
-                                {/* After Close Column */}
-                                <div className="session-column">
-                                    <div className="session-header">After Close</div>
-                                    {dayData.amc.map((company, i) => (
-                                        <CompanyCard key={`${company.symbol}-${i}`} company={company} />
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
+                            </motion.div>
+                        );
+                    })}
+                </motion.div>
+            )}
         </div>
     );
 }

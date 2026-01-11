@@ -28,13 +28,10 @@ export function AppHeader() {
             <div className="header-container">
 
                 <div className='items-left'>
+                    <Link className='navbar-item' to='/' style={{ margin: "0px" }}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chart-no-axes-combined-icon lucide-chart-no-axes-combined"><path d="M12 16v5" /><path d="M16 14v7" /><path d="M20 10v11" /><path d="m22 3-8.646 8.646a.5.5 0 0 1-.708 0L9.354 8.354a.5.5 0 0 0-.707 0L2 15" /><path d="M4 18v3" /><path d="M8 14v7" /></svg>
 
-                    {/* <input className='ticker-input'
-                        type=''
-                        
-                        
-                        
-                    /> */}
+                    </Link>
 
                     <form className="d-flex my-2 my-lg-0" onSubmit={handleSearch}>
                         <input className="form-control me-2"
@@ -52,10 +49,6 @@ export function AppHeader() {
                 </div>
 
                 <div className="items-right">
-                    <Link className='navbar-item' to='/'>
-                        Home
-                    </Link>
-
                     <Link className='navbar-item' to='/earnings'>
                         Upcoming Earnings
                     </Link>

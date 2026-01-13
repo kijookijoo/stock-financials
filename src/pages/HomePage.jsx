@@ -12,9 +12,8 @@ export function HomePage() {
         { ticker: 'GOOGL', name: 'Alphabet' },
         { ticker: 'AMZN', name: 'Amazon' },
         { ticker: 'NVDA', name: 'NVIDIA' },
-        // { ticker: 'TSLA', name: 'Tesla' },
+        { ticker: 'TSLA', name: 'Tesla' },
         { ticker: 'META', name: 'Meta' },
-        { ticker: 'PLTR', name: 'Palantir'}
     ];
 
     const financeGiants = [

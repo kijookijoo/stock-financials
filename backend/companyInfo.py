@@ -16,7 +16,7 @@ router = APIRouter()
 async def get_company_info(ticker: str):
     ticker = ticker.upper()
 
-    FMP_API_KEY = "pXnv76gJel1TqdW5Y74zOFPVkWPoh4gB"
+    FMP_API_KEY = os.getenv("FMP_API_KEY")
     
     name = ticker
     logo_url = f"https://financialmodelingprep.com/image-stock/{ticker}.png"

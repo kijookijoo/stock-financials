@@ -125,7 +125,7 @@ def parse_sec_number(text: str) -> Optional[float]:
     
     is_negative = False
     
-        if clean.startswith('(') and clean.endswith(')'):
+    if clean.startswith('(') and clean.endswith(')'):
         is_negative = True
         clean = clean[1:-1].strip()
     

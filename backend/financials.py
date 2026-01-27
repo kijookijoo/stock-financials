@@ -11,7 +11,16 @@ from typing import Optional, Dict, List, Tuple
 from dataclasses import dataclass
 
 router = APIRouter()
-dl = Downloader("Developer", "kjyoon0125@gmail.com")
+
+# Global variable to hold the downloader instance
+_dl_instance = None
+
+def get_downloader():
+    """Lazy-initialize the SEC downloader to prevent startup crashes on serverless environments."""
+    global _dl_instance
+    if _dl_instance is None:
+        _dl_instance = Downloader("Developer", "kjyoon0125@gmail.com")
+    return _dl_instance
 
 HEADERS = {
     "User-Agent": "UBC Computer Science Student Personal Project kjyoon0125@gmail.com",
@@ -389,13 +398,13 @@ async def read_financials(ticker: str):
     try:
         # Try 10-K first, then 10-Q
         metadatas = await anyio.to_thread.run_sync(
-            dl.get_filing_metadatas,
+            get_downloader().get_filing_metadatas,
             RequestedFilings(ticker_or_cik=ticker, form_type="10-K", limit=1)
         )
         
         if not metadatas:
             metadatas = await anyio.to_thread.run_sync(
-                dl.get_filing_metadatas,
+                get_downloader().get_filing_metadatas,
                 RequestedFilings(ticker_or_cik=ticker, form_type="10-Q", limit=1)
             )
         

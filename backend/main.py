@@ -10,6 +10,21 @@ load_dotenv()
 
 app = FastAPI()
 
+# Root health check endpoint for Vercel
+@app.get("/")
+async def root():
+    return {"message": "Backend is running", "environment": os.environ.get("VERCEL", "local")}
+
+@app.middleware("http")
+async def log_errors(request, call_next):
+    try:
+        return await call_next(request)
+    except Exception as e:
+        import traceback
+        print(f"CRITICAL ERROR: {str(e)}")
+        print(traceback.format_exc())
+        raise e
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],

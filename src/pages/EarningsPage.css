@@ -4,7 +4,6 @@
   padding: 2rem;
   max-width: 1400px;
   margin: 0 auto;
-  font-family: "Inter", sans-serif;
   color: white;
   height: auto;
   min-height: 100vh;
@@ -171,7 +170,7 @@
 .company-name {
   font-weight: 700;
   font-size: 0.75rem;
-  color: #fff;
+  color: #fffcfc;
   margin-bottom: 2px;
 
   word-break: break-word;

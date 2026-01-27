@@ -2,7 +2,8 @@ fastapi
 uvicorn
 requests
 beautifulsoup4
-sec-downloader
+sec-downloader==0.12.2
+sec-edgar-downloader==5.0.3
 python-dotenv
 lxml
 yfinance
@@ -10,4 +11,4 @@ openai
 google-genai
 httpx
 anyio
-pyrate-limiter<3.0.0
+pyrate-limiter==2.10.0

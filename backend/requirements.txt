@@ -10,3 +10,4 @@ openai
 google-genai
 httpx
 anyio
+pyrate-limiter<3.0.0

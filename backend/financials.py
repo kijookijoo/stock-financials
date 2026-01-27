@@ -28,10 +28,10 @@ class StatementCandidate:
     long_name: str
     menu_category: str
     score: int
-    source: str  # 'FilingSummary' or 'fallback'
+    source: str 
     
     def __lt__(self, other):
-        return self.score > other.score  # Higher score = better
+        return self.score > other.score  
 
 def rank_statement_candidate(short_name: str, long_name: str, menu_category: str) -> int:
     """
@@ -70,18 +70,12 @@ def rank_statement_candidate(short_name: str, long_name: str, menu_category: str
     return score
 
 def classify_statement_type(short_name: str, long_name: str, menu_category: str) -> Optional[str]:
-    """
-    Classifies a statement using multi-field evaluation.
-    Returns: 'incomeStatement', 'balanceSheet', 'cashFlowStatement', or None
-    """
     combined_text = f"{short_name} {long_name} {menu_category}".lower()
     
-    # Skip clearly non-financial metadata
     skip_terms = ["document and entity information", "cover page", "table of contents"]
     if any(term in combined_text for term in skip_terms):
         return None
     
-    # Income Statement indicators
     income_indicators = [
         "income statement", 
         "operations", 
@@ -93,7 +87,6 @@ def classify_statement_type(short_name: str, long_name: str, menu_category: str)
     if any(indicator in combined_text for indicator in income_indicators):
         return "incomeStatement"
     
-    # Balance Sheet indicators
     balance_indicators = [
         "balance sheet",
         "financial position",
@@ -102,7 +95,6 @@ def classify_statement_type(short_name: str, long_name: str, menu_category: str)
     if any(indicator in combined_text for indicator in balance_indicators):
         return "balanceSheet"
     
-    # Cash Flow indicators
     cash_flow_indicators = [
         "cash flow",
         "statement of cash flows"
@@ -123,13 +115,8 @@ def parse_sec_number(text: str) -> Optional[float]:
     if not text:
         return None
     
-    # Remove common non-numeric characters
     clean = text.replace('$', '').replace(',', '').replace('%', '').strip()
-    
-    # Replace em dashes and special minus signs
     clean = clean.replace('—', '-').replace('–', '-').replace('−', '-')
-    
-    # Remove footnote markers
     clean = re.sub(r'\*+', '', clean)
     clean = re.sub(r'\([0-9]+\)', '', clean).strip()
     
@@ -138,8 +125,7 @@ def parse_sec_number(text: str) -> Optional[float]:
     
     is_negative = False
     
-    # Handle parentheses for negatives
-    if clean.startswith('(') and clean.endswith(')'):
+        if clean.startswith('(') and clean.endswith(')'):
         is_negative = True
         clean = clean[1:-1].strip()
     
@@ -150,17 +136,10 @@ def parse_sec_number(text: str) -> Optional[float]:
         return None
 
 def extract_inline_xbrl_value(cell) -> Optional[str]:
-    """
-    Extract values from inline XBRL (ix: namespace).
-    Looks for ix:nonFraction and ix:nonNumeric elements.
-    """
-    # Check for ix:nonFraction elements
     ix_elements = cell.find_all(['ix:nonfraction', 'ix:nonnumeric'])
     if ix_elements:
-        # Get the first one (usually the primary value)
         return ix_elements[0].get_text(strip=True)
     
-    # Fallback to regular text extraction
     return None
 
 def formatHTML_sync(htmlString: str) -> str:
@@ -173,51 +152,41 @@ def formatHTML_sync(htmlString: str) -> str:
     clean_html = htmlString[html_start:]
     soup = BeautifulSoup(clean_html, 'html.parser')
     
-    # Remove namespace metadata text nodes
     for text_node in soup.find_all(text=True):
         if 'v3.' in text_node or 'v2.' in text_node:
             if text_node.parent:
                 text_node.parent.decompose()
-    
-    # Unwrap anchor tags but preserve content
+
     for tag in soup.find_all("a"):
         tag.unwrap()
     
-    # Remove metadata tables only
     for table in soup.find_all("table"):
         text_content = table.get_text().lower()
         if any(term in text_content for term in ["namespace prefix", "data type", "balance type"]):
             table.decompose()
             continue
         
-        # Process rows - but preserve header rows and first data rows
         rows = table.find_all("tr")
         rows_to_remove = []
         
         for i, row in enumerate(rows):
-            # Always preserve first two rows (likely headers)
             if i < 2:
                 continue
             
-            # Always preserve rows with <th> elements
             if row.find_all("th"):
                 continue
             
             cells = row.find_all(["td", "th"])
             row_text = row.get_text().strip().lower()
             
-            # Only remove if it's a short title row with no numeric data
             has_numeric_data = any(parse_sec_number(cell.get_text(strip=True)) is not None for cell in cells)
             
-            # Do NOT remove rows containing "statement" if they have numeric data
             if "statement" in row_text and len(row_text) < 100 and not has_numeric_data:
                 rows_to_remove.append(row)
                 continue
             
-            # Add growth badges for numeric cells
             current_row_vals = {}
             for idx, cell in enumerate(cells):
-                # Try inline XBRL extraction first
                 cell_text = extract_inline_xbrl_value(cell) or cell.get_text(strip=True)
                 val = parse_sec_number(cell_text)
                 if val is not None:
@@ -278,7 +247,6 @@ async def fetch_statement_with_retry(client: httpx.AsyncClient, url: str, max_re
             if attempt == max_retries - 1:
                 return False, "", error_msg
         
-        # Wait before retry
         await asyncio.sleep(0.5)
     
     return False, "", "Max retries exceeded"
@@ -308,15 +276,12 @@ async def collect_candidates_from_filing_summary(client: httpx.AsyncClient, base
             long_name = long_name_tag.text if long_name_tag else ""
             menu_category = menu_category_tag.text if menu_category_tag else ""
             
-            # Classify using multi-field evaluation
             statement_type = classify_statement_type(short_name, long_name, menu_category)
             if statement_type is None:
                 continue
             
-            # Rank the candidate
             score = rank_statement_candidate(short_name, long_name, menu_category)
             
-            # Prefer HtmlFileName, fallback to XmlFileName
             file_url = None
             if html_file_tag:
                 file_url = base_url + html_file_tag.text
@@ -336,7 +301,6 @@ async def collect_candidates_from_filing_summary(client: httpx.AsyncClient, base
     
     except Exception as e:
         print(f"Failed to fetch FilingSummary.xml: {e}")
-        # Return empty list to trigger fallback
         return []
     
     return candidates
@@ -361,7 +325,6 @@ async def collect_candidates_from_index(client: httpx.AsyncClient, base_url: str
                 href = link['href']
                 text = link.get_text().lower()
                 
-                # Look for .htm files with financial keywords
                 if not href.endswith(('.htm', '.html')):
                     continue
                 
@@ -379,7 +342,6 @@ async def collect_candidates_from_index(client: httpx.AsyncClient, base_url: str
                             source="fallback"
                         ))
             
-            # If we found candidates, return them
             if candidates:
                 return candidates
         
@@ -394,14 +356,12 @@ async def fetch_best_statement(client: httpx.AsyncClient, candidates: List[State
     Fetch the best statement from candidates with fallback.
     Returns: (content, confidence, source)
     """
-    # Sort candidates by score
     candidates.sort()
     
     for candidate in candidates:
         success, content, error = await fetch_statement_with_retry(client, candidate.url)
         
         if success and content:
-            # Determine confidence
             confidence = "high" if candidate.score > 3 and candidate.source == "FilingSummary" else "medium"
             if candidate.source == "fallback":
                 confidence = "low"

@@ -113,27 +113,74 @@ export function FinancialsPage() {
                         <div className="info-container">
                             <div className="profile-container">
                                 {(companyInfo["image"] && companyInfo["image"] !== "") &&
-                                    <div className="logo-wrapper">
+                                    <motion.div
+                                        className="logo-wrapper"
+                                        initial={{
+                                            x: "calc(50vw - 50%)",
+                                            y: 0,
+                                            scale: 1.2,
+                                            opacity: 0
+                                        }}
+                                        animate={{
+                                            x: 0,
+                                            y: 0,
+                                            scale: 1,
+                                            opacity: 1
+                                        }}
+                                        transition={{
+                                            duration: 0.7,
+                                            ease: "easeOut"
+                                        }}
+                                    >
                                         {ticker && currDisplay && <img className="company-logo" src={companyInfo["image"]} />}
-                                    </div>
+                                    </motion.div>
                                 }
 
-                                {(companyInfo["name"] && companyInfo["name"] !== "") && <div className="company-name">
-                                    {ticker && currDisplay && <h1>{companyInfo["name"]}</h1>}
-                                </div>}
+                                {(companyInfo["name"] && companyInfo["name"] !== "") &&
+                                    <motion.div
+                                        className="company-name"
+                                        initial={{ opacity: 0, y: -10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{
+                                            delay: 0.3,
+                                            duration: 0.7,
+                                            ease: "easeOut"
+                                        }}
+                                    >
+                                        {ticker && currDisplay && <h1>{companyInfo["name"]}</h1>}
+                                    </motion.div>
+                                }
 
-                                <h4 className="company-ticker">
+                                <motion.h4
+                                    className="company-ticker"
+                                    initial={{ opacity: 0, y: -10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{
+                                        delay: 0.4,
+                                        duration: 0.7,
+                                        ease: "easeOut"
+                                    }}
+                                >
                                     {ticker && currDisplay && ("(" + ticker + ")")}
-                                </h4>
+                                </motion.h4>
                             </div>
 
-                            <div className="intro-container">
+                            <motion.div
+                                className="intro-container"
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{
+                                    delay: 0.4,
+                                    duration: 0.4,
+                                    ease: "easeOut"
+                                }}
+                            >
                                 {(companyInfo["intro"] && companyInfo["intro"] !== "") &&
                                     <p className="company-intro">
                                         {ticker && currDisplay && companyInfo["intro"]}
                                     </p>
                                 }
-                            </div>
+                            </motion.div>
 
                         </div>
                     ) : <ClipLoader
@@ -147,7 +194,13 @@ export function FinancialsPage() {
 
                     <div className="summary-container">
                         <AnimatePresence>
-                            {currDisplay && <motion.button className="income-statement"
+                            {currDisplay && <motion.button
+                                className="income-statement"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{
+                                    ease: "easeOut"
+                                }}
                                 whileHover={{ scale: 1.1 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={() => changeStatementDisplay("incomeStatement")}
@@ -157,7 +210,13 @@ export function FinancialsPage() {
                         </AnimatePresence>
 
                         <AnimatePresence>
-                            {currDisplay && <motion.button className="balance-sheet"
+                            {currDisplay && <motion.button
+                                className="balance-sheet"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{
+                                    ease: "easeOut"
+                                }}
                                 whileHover={{ scale: 1.1 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={() => changeStatementDisplay("balanceSheet")}
@@ -168,7 +227,13 @@ export function FinancialsPage() {
                         </AnimatePresence>
 
                         <AnimatePresence>
-                            {currDisplay && <motion.button className="statement-cashflow"
+                            {currDisplay && <motion.button
+                                className="statement-cashflow"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{
+                                    ease: "easeOut"
+                                }}
                                 whileHover={{ scale: 1.1 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={() => changeStatementDisplay("cashFlowStatement")}
@@ -181,14 +246,34 @@ export function FinancialsPage() {
 
                     {currDisplay && statementDisplay && (
                         <>
-                            <h1 className="statement-header">
-                                {currStatement === "incomeStatement" && "Income Statement"}
-                                {currStatement === "balanceSheet" && "Balance Sheet"}
-                                {currStatement === "cashFlowStatement" && "Statement of Cash Flows"}
-                            </h1>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                                <h1 className="statement-header" style={{ margin: 0 }}>
+                                    {currStatement === "incomeStatement" && "Income Statement"}
+                                    {currStatement === "balanceSheet" && "Balance Sheet"}
+                                    {currStatement === "cashFlowStatement" && "Statement of Cash Flows"}
+                                </h1>
+                                {statements[currStatement]?.confidence && (
+                                    <span
+                                        style={{
+                                            display: 'inline-block',
+                                            padding: '4px 12px',
+                                            borderRadius: '12px',
+                                            fontSize: '12px',
+                                            fontWeight: '600',
+                                            backgroundColor:
+                                                statements[currStatement].confidence === 'high' ? '#10b981' :
+                                                    statements[currStatement].confidence === 'medium' ? '#f59e0b' :
+                                                        statements[currStatement].confidence === 'low' ? '#ef4444' : '#6b7280',
+                                            color: 'white'
+                                        }}
+                                    >
+                                        {statements[currStatement].confidence.toUpperCase()} CONFIDENCE
+                                    </span>
+                                )}
+                            </div>
 
                             <div className="report-container">
-                                {formatHTML(statements[currStatement])}
+                                {formatHTML(statements[currStatement]?.content || statements[currStatement] || "")}
                             </div>
                         </>
                     )}

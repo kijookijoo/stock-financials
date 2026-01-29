@@ -59,10 +59,9 @@ export function EarningsPage() {
 
             processEarningsData(earningsData, startDate);
 
-            // Preload top logos to ensure "until all images are loaded" effect
             const topSymbols = earningsData
                 .sort((a, b) => (b.revenueEstimate || 0) - (a.revenueEstimate || 0))
-                .slice(0, 15) // Preload top 15 to balance speed and experience
+                .slice(0, 15) 
                 .map(item => `https://financialmodelingprep.com/image-stock/${item.symbol}.png`);
 
             await Promise.allSettled(topSymbols.map(src => {
@@ -70,8 +69,8 @@ export function EarningsPage() {
                     const img = new Image();
                     img.src = src;
                     img.onload = resolve;
-                    img.onerror = resolve; // Resolve anyway to not block forever
-                    setTimeout(resolve, 2000); // Max wait 2s
+                    img.onerror = resolve; 
+                    setTimeout(resolve, 2000); 
                 });
             }));
 

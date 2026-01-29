@@ -1,7 +1,15 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
-from dotenv import load_dotenv
+from sec_downloader import Downloader
+from sec_downloader.types import RequestedFilings
+from bs4 import BeautifulSoup
+import httpx
 import os
+import anyio
+import asyncio
+from dotenv import load_dotenv
+
+# Import routers
 from financials import router as financials_router
 from companyInfo import router as company_info_router
 from analysis import router as analysis_router

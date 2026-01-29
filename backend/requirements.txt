@@ -1,13 +1,11 @@
-pyrate-limiter<3.0.0
-yfinance==0.2.37
 fastapi
 uvicorn
 requests
 beautifulsoup4
-sec-downloader==0.10.1
-sec-edgar-downloader>=5.0.0
+sec-downloader
 python-dotenv
 lxml
+yfinance
 openai
 google-genai
 httpx

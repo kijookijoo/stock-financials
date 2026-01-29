@@ -2,7 +2,9 @@ fastapi
 uvicorn
 requests
 beautifulsoup4
-sec-downloader
+sec-downloader==0.10.1
+sec-edgar-downloader==4.4.1
+pyrate-limiter==2.10.0
 python-dotenv
 lxml
 yfinance

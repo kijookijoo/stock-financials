@@ -47,7 +47,7 @@ def _generate_intro(name: str) -> str:
             input=[
                 {
                     "role": "system",
-                    "content": "Write a concise 2-3 sentence company overview for retail investors.",
+                    "content": "Write a 40-word max sentence company overview for retail investors. Be Specific, avoiding generic terms like cutting-edge, leading, robust.",
                 },
                 {
                     "role": "user",

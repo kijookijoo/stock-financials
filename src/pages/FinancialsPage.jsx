@@ -246,6 +246,11 @@ export function FinancialsPage() {
 
                     {currDisplay && statementDisplay && (
                         <>
+                            {statements?.error && (
+                                <div style={{ color: '#ffb3b3', marginBottom: '12px' }}>
+                                    Financials error: {statements.error}
+                                </div>
+                            )}
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
                                 <h1 className="statement-header" style={{ margin: 0 }}>
                                     {currStatement === "incomeStatement" && "Income Statement"}

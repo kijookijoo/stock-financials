@@ -418,6 +418,7 @@ async def read_financials(ticker: str):
         
         if not metadatas:
             print(f"No filings found for {ticker}")
+            financial_statements["error"] = f"No SEC 10-K/10-Q filings found for {ticker}."
             return financial_statements
         
         metadata = metadatas[0]
@@ -468,4 +469,5 @@ async def read_financials(ticker: str):
     
     except Exception as e:
         print(f"Global error fetching financials for {ticker}: {e}")
+        financial_statements["error"] = str(e)
         return financial_statements

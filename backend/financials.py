@@ -18,6 +18,16 @@ def get_downloader():
     global _dl_instance
     if _dl_instance is None:
         try:
+            # sec_downloader may pass deprecated kwargs to newer pyrate_limiter versions.
+            import inspect
+            import pyrate_limiter
+            limiter_init = pyrate_limiter.Limiter.__init__
+            if "raise_when_fail" not in inspect.signature(limiter_init).parameters:
+                def _compat_limiter_init(self, *args, **kwargs):
+                    kwargs.pop("raise_when_fail", None)
+                    return limiter_init(self, *args, **kwargs)
+                pyrate_limiter.Limiter.__init__ = _compat_limiter_init
+
             # Vercel may resolve an older sec-edgar-downloader where this symbol is missing.
             # Patch it before importing sec_downloader to keep compatibility.
             import sec_edgar_downloader._constants as sec_constants

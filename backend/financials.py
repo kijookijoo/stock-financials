@@ -22,9 +22,16 @@ def get_downloader():
             import inspect
             import pyrate_limiter
             limiter_init = pyrate_limiter.Limiter.__init__
-            if "raise_when_fail" not in inspect.signature(limiter_init).parameters:
+            missing_kwargs = []
+            sig_params = inspect.signature(limiter_init).parameters
+            if "raise_when_fail" not in sig_params:
+                missing_kwargs.append("raise_when_fail")
+            if "max_delay" not in sig_params:
+                missing_kwargs.append("max_delay")
+            if missing_kwargs:
                 def _compat_limiter_init(self, *args, **kwargs):
-                    kwargs.pop("raise_when_fail", None)
+                    for key in missing_kwargs:
+                        kwargs.pop(key, None)
                     return limiter_init(self, *args, **kwargs)
                 pyrate_limiter.Limiter.__init__ = _compat_limiter_init
 

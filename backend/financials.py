@@ -18,6 +18,11 @@ def get_downloader():
     global _dl_instance
     if _dl_instance is None:
         try:
+            # Vercel may resolve an older sec-edgar-downloader where this symbol is missing.
+            # Patch it before importing sec_downloader to keep compatibility.
+            import sec_edgar_downloader._constants as sec_constants
+            if not hasattr(sec_constants, "AMENDS_SUFFIX"):
+                sec_constants.AMENDS_SUFFIX = "/A"
             from sec_downloader import Downloader
         except Exception as e:
             raise RuntimeError(f"sec_downloader import failed: {e}")

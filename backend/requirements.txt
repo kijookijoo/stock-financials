@@ -3,11 +3,11 @@ fastapi
 uvicorn
 requests
 beautifulsoup4
-sec-downloader==0.10.1
+sec-downloader==0.12.2
 sec-edgar-downloader==5.0.3
 python-dotenv
 lxml
 openai
 google-genai
 httpx
-pyrate-limiter>=3.6.0
+pyrate-limiter==3.9.0

@@ -5,6 +5,7 @@ import os
 import anyio
 import asyncio
 import re
+import traceback
 from typing import Optional, Dict, List, Tuple
 from dataclasses import dataclass
 
@@ -18,28 +19,6 @@ def get_downloader():
     global _dl_instance
     if _dl_instance is None:
         try:
-            # sec_downloader may pass deprecated kwargs to newer pyrate_limiter versions.
-            import inspect
-            import pyrate_limiter
-            limiter_init = pyrate_limiter.Limiter.__init__
-            missing_kwargs = []
-            sig_params = inspect.signature(limiter_init).parameters
-            if "raise_when_fail" not in sig_params:
-                missing_kwargs.append("raise_when_fail")
-            if "max_delay" not in sig_params:
-                missing_kwargs.append("max_delay")
-            if missing_kwargs:
-                def _compat_limiter_init(self, *args, **kwargs):
-                    for key in missing_kwargs:
-                        kwargs.pop(key, None)
-                    return limiter_init(self, *args, **kwargs)
-                pyrate_limiter.Limiter.__init__ = _compat_limiter_init
-
-            # Vercel may resolve an older sec-edgar-downloader where this symbol is missing.
-            # Patch it before importing sec_downloader to keep compatibility.
-            import sec_edgar_downloader._constants as sec_constants
-            if not hasattr(sec_constants, "AMENDS_SUFFIX"):
-                sec_constants.AMENDS_SUFFIX = "/A"
             from sec_downloader import Downloader
         except Exception as e:
             raise RuntimeError(f"sec_downloader import failed: {e}")
@@ -420,6 +399,7 @@ async def read_financials(ticker: str):
     }
     
     try:
+        stage = "fetch_10k_metadata"
         # Try 10-K first, then 10-Q
         metadatas = await anyio.to_thread.run_sync(
             get_downloader().get_filing_metadatas,
@@ -427,6 +407,7 @@ async def read_financials(ticker: str):
         )
         
         if not metadatas:
+            stage = "fetch_10q_metadata"
             metadatas = await anyio.to_thread.run_sync(
                 get_downloader().get_filing_metadatas,
                 f"1/{ticker}/10-Q"
@@ -437,9 +418,11 @@ async def read_financials(ticker: str):
             financial_statements["error"] = f"No SEC 10-K/10-Q filings found for {ticker}."
             return financial_statements
         
+        stage = "build_base_url"
         metadata = metadatas[0]
         base_url = metadata.primary_doc_url.rsplit("/", 1)[0] + "/"
         
+        stage = "fetch_statement_documents"
         async with httpx.AsyncClient(headers=HEADERS, timeout=60.0) as client:
             # Step 1: Try FilingSummary.xml
             candidates_by_type: Dict[str, List[StatementCandidate]] = {
@@ -448,6 +431,7 @@ async def read_financials(ticker: str):
                 "cashFlowStatement": []
             }
             
+            stage = "collect_from_filing_summary"
             filing_summary_candidates = await collect_candidates_from_filing_summary(client, base_url)
             
             # Group by statement type
@@ -457,6 +441,7 @@ async def read_financials(ticker: str):
             # Step 2: If FilingSummary fails or yields no candidates, use fallback
             if not filing_summary_candidates:
                 print(f"FilingSummary.xml failed or empty for {ticker}, using fallback...")
+                stage = "collect_from_index_fallback"
                 fallback_candidates = await collect_candidates_from_index(client, base_url)
                 
                 for candidate in fallback_candidates:
@@ -470,6 +455,7 @@ async def read_financials(ticker: str):
                     print(f"No candidates found for {statement_type}")
                     continue
                 
+                stage = f"fetch_best_{statement_type}"
                 content, confidence, source = await fetch_best_statement(client, candidates)
                 
                 if content:
@@ -484,6 +470,9 @@ async def read_financials(ticker: str):
         return financial_statements
     
     except Exception as e:
+        trace = traceback.format_exc()
         print(f"Global error fetching financials for {ticker}: {e}")
-        financial_statements["error"] = str(e)
+        print(trace)
+        financial_statements["error"] = f"{type(e).__name__} at {locals().get('stage', 'unknown_stage')}: {e}"
+        financial_statements["error_trace"] = trace[-2000:]
         return financial_statements

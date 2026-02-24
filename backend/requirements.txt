@@ -5,7 +5,6 @@ uvicorn
 requests
 beautifulsoup4
 sec-downloader==0.10.1
-sec-edgar-downloader==4.4.1
 python-dotenv
 lxml
 openai

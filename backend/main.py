@@ -1,11 +1,15 @@
-from fastapi import APIRouter
-from sec_downloader import Downloader
-from sec_downloader.types import RequestedFilings
-from bs4 import BeautifulSoup
-import httpx
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
 import os
-import anyio
-import asyncio
+
+try:
+    from .financials import router as financials_router
+    from .companyInfo import router as company_info_router
+except ImportError:
+    from financials import router as financials_router
+    from companyInfo import router as company_info_router
+
 load_dotenv()
 
 app = FastAPI()
@@ -35,7 +39,6 @@ app.add_middleware(
 
 app.include_router(financials_router)
 app.include_router(company_info_router)
-app.include_router(analysis_router)
 
 if __name__ == "__main__":
     import uvicorn

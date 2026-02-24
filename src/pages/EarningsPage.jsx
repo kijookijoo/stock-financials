@@ -43,7 +43,7 @@ export function EarningsPage() {
                 const friday = addDays(startDate, 4);
                 const fromDate = format(startDate, 'yyyy-MM-dd');
                 const toDate = format(friday, 'yyyy-MM-dd');
-
+                // gtgy1230
                 const response = await fetch(`https://finnhub.io/api/v1/calendar/earnings?from=${fromDate}&to=${toDate}&token=${API_TOKEN}`);
                 const data = await response.json();
 

@@ -398,22 +398,16 @@ async def read_financials(ticker: str):
     }
     
     try:
-        try:
-            from sec_downloader.types import RequestedFilings
-        except Exception as e:
-            financial_statements["error"] = f"RequestedFilings import failed: {e}"
-            return financial_statements
-
         # Try 10-K first, then 10-Q
         metadatas = await anyio.to_thread.run_sync(
             get_downloader().get_filing_metadatas,
-            RequestedFilings(ticker_or_cik=ticker, form_type="10-K", limit=1)
+            f"1/{ticker}/10-K"
         )
         
         if not metadatas:
             metadatas = await anyio.to_thread.run_sync(
                 get_downloader().get_filing_metadatas,
-                RequestedFilings(ticker_or_cik=ticker, form_type="10-Q", limit=1)
+                f"1/{ticker}/10-Q"
             )
         
         if not metadatas:

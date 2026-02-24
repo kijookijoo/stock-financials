@@ -1,6 +1,4 @@
 from fastapi import APIRouter
-from sec_downloader import Downloader
-from sec_downloader.types import RequestedFilings
 from bs4 import BeautifulSoup
 import httpx
 import os
@@ -19,6 +17,10 @@ def get_downloader():
     """Lazy-initialize the SEC downloader to prevent startup crashes on serverless environments."""
     global _dl_instance
     if _dl_instance is None:
+        try:
+            from sec_downloader import Downloader
+        except Exception as e:
+            raise RuntimeError(f"sec_downloader import failed: {e}")
         _dl_instance = Downloader("Developer", "kjyoon0125@gmail.com")
     return _dl_instance
 
@@ -396,6 +398,12 @@ async def read_financials(ticker: str):
     }
     
     try:
+        try:
+            from sec_downloader.types import RequestedFilings
+        except Exception as e:
+            financial_statements["error"] = f"RequestedFilings import failed: {e}"
+            return financial_statements
+
         # Try 10-K first, then 10-Q
         metadatas = await anyio.to_thread.run_sync(
             get_downloader().get_filing_metadatas,

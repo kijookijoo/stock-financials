@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os
 import traceback
+import anyio
 
 financials_router = None
 company_info_router = None
@@ -29,6 +30,43 @@ app = FastAPI()
 @app.get("/")
 async def root():
     return {"message": "Backend is running", "environment": os.environ.get("VERCEL", "local")}
+
+
+def _generate_intro(name: str) -> str:
+    fallback = f"{name} is a publicly traded company."
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        return fallback
+
+    try:
+        from openai import OpenAI
+
+        client = OpenAI(api_key=api_key)
+        response = client.responses.create(
+            model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
+            input=[
+                {
+                    "role": "system",
+                    "content": "Write a concise 2-3 sentence company overview for retail investors.",
+                },
+                {
+                    "role": "user",
+                    "content": f"Company: {name}",
+                },
+            ],
+            max_output_tokens=120,
+        )
+        text = (response.output_text or "").strip()
+        return text if text else fallback
+    except Exception as e:
+        print(f"Intro generation failed: {e}")
+        print(traceback.format_exc())
+        return fallback
+
+
+@app.get("/intro")
+async def intro(name: str):
+    return await anyio.to_thread.run_sync(_generate_intro, name)
 
 @app.middleware("http")
 async def log_errors(request, call_next):

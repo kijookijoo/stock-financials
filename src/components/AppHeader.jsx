@@ -7,7 +7,7 @@ export function AppHeader() {
 
 
     function handleInput(event) {
-        if (event.currentTarget.value.length <= 4) {
+        if (event.currentTarget.value.length <= 5) {
             setInputText(event.currentTarget.value.toUpperCase());
         }
     }

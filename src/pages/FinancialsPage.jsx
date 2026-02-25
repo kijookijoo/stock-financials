@@ -266,7 +266,7 @@ export function FinancialsPage() {
                                     }
 
                                     <div className="company-case-row">
-                                        <div className="company-case-label">AI quick takes</div>
+                                        <div className="company-case-label">Introduction</div>
                                         <div className="company-case-actions">
                                             <button
                                                 type="button"

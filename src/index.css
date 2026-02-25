@@ -8,7 +8,9 @@
 }
 
 body {
-  background-color: rgb(26, 37, 47);
+  background:
+    radial-gradient(1200px 600px at 20% -10%, rgba(197, 172, 107, 0.08), transparent 62%),
+    linear-gradient(180deg, #171a20 0%, #111318 54%, #0a0b0d 100%);
   width: 100%;
   overflow-x: hidden;
   overflow-y: auto;

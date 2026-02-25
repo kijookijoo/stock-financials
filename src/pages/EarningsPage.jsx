@@ -161,7 +161,7 @@ export function EarningsPage() {
 
             {loading ? (
                 <div className="loading-spinner-container">
-                    <ClipLoader color={"#ffffff"} size={50} />
+                    <ClipLoader color={"#c5ac6b"} size={50} />
                 </div>
             ) : (
                 <motion.div

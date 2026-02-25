@@ -1,0 +1,68 @@
+@media (pointer: fine) {
+  body,
+  a,
+  button,
+  input,
+  textarea,
+  select,
+  label,
+  [role="button"] {
+    cursor: none !important;
+  }
+}
+
+@media (pointer: coarse) {
+  body,
+  a,
+  button,
+  input,
+  textarea,
+  select,
+  label,
+  [role="button"] {
+    cursor: auto !important;
+  }
+}
+
+.custom-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 30px;
+  height: 30px;
+  border: 2px solid rgba(255, 255, 255, 0.96);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0;
+  transform: translate3d(-100px, -100px, 0);
+  transition: opacity 0.16s ease;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.25),
+    0 0 12px rgba(255, 255, 255, 0.2);
+}
+
+.custom-cursor::before,
+.custom-cursor::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 2px;
+  transform: translate(-50%, -50%);
+}
+
+.custom-cursor::before {
+  width: 12px;
+  height: 2px;
+}
+
+.custom-cursor::after {
+  width: 2px;
+  height: 12px;
+}
+
+.custom-cursor.is-visible {
+  opacity: 1;
+}

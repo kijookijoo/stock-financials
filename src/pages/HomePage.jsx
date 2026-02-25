@@ -37,14 +37,17 @@ const sectorData = [
     companyCols: 12,
     companyRows: 12,
     companies: [
-      { ticker: 'GOOGL', name: 'Alphabet', colStart: 1, rowStart: 1, colSpan: 8, rowSpan: 7 },
-      { ticker: 'META', name: 'Meta', colStart: 9, rowStart: 1, colSpan: 4, rowSpan: 4 },
-      { ticker: 'ORCL', name: 'Oracle', colStart: 9, rowStart: 5, colSpan: 4, rowSpan: 3 },
-      { ticker: 'CRM', name: 'Salesforce', colStart: 1, rowStart: 8, colSpan: 4, rowSpan: 5 },
-      { ticker: 'ADBE', name: 'Adobe', colStart: 5, rowStart: 8, colSpan: 4, rowSpan: 5 },
-      { ticker: 'NFLX', name: 'Netflix', colStart: 9, rowStart: 8, colSpan: 4, rowSpan: 3 },
-      { ticker: 'PLTR', name: 'Palantir', colStart: 9, rowStart: 11, colSpan: 2, rowSpan: 2 },
-      { ticker: 'NOW', name: 'ServiceNow', colStart: 11, rowStart: 11, colSpan: 2, rowSpan: 2 }
+      { ticker: 'META', name: 'Meta', colStart: 4, rowStart: 1, colSpan: 4, rowSpan: 7 },
+      { ticker: 'GOOGL', name: 'Alphabet', colStart: 1, rowStart: 1, colSpan: 3, rowSpan: 13 },
+      { ticker: 'APP', name: 'AppLovin', colStart: 8, rowStart: 10, colSpan: 3, rowSpan: 3 },
+      { ticker: 'NFLX', name: 'Netflix', colStart: 4, rowStart: 8, colSpan: 2, rowSpan: 5 },
+      { ticker: 'ORCL', name: 'Oracle', colStart: 6, rowStart: 8, colSpan: 2, rowSpan: 5 },
+      { ticker: 'CRM', name: 'Salesforce', colStart: 8, rowStart: 6, colSpan: 3, rowSpan: 4 },
+      { ticker: 'PLTR', name: 'Palantir', colStart: 8, rowStart: 1, colSpan: 3, rowSpan: 5 },
+      { ticker: 'SNOW', name: 'Snowflake', colStart: 11, rowStart: 1, colSpan: 2, rowSpan: 3 },
+      { ticker: 'IBM', name: 'IBM', colStart: 11, rowStart: 4, colSpan: 2, rowSpan: 3 },
+      { ticker: 'ADBE', name: 'Adobe', colStart: 11, rowStart: 7, colSpan: 2, rowSpan: 3},
+      { ticker: 'CRWD', name: 'CrowdStrike', colStart: 11, rowStart: 10, colSpan: 2, rowSpan: 3 }
     ]
   },
   {
@@ -59,8 +62,8 @@ const sectorData = [
     companyRows: 10,
     companies: [
       { ticker: 'AMZN', name: 'Amazon', colStart: 1, rowStart: 1, colSpan: 6, rowSpan: 6 },
-      { ticker: 'WMT', name: 'Walmart', colStart: 7, rowStart: 1, colSpan: 4, rowSpan: 4 },
-      { ticker: 'COST', name: 'Costco', colStart: 7, rowStart: 5, colSpan: 4, rowSpan: 2 },
+      { ticker: 'WMT', name: 'Walmart', colStart: 7, rowStart: 1, colSpan: 4, rowSpan: 3 },
+      { ticker: 'COST', name: 'Costco', colStart: 7, rowStart: 4, colSpan: 4, rowSpan: 3},
       { ticker: 'KO', name: 'Coca-Cola', colStart: 1, rowStart: 7, colSpan: 4, rowSpan: 4 },
       { ticker: 'HD', name: 'Home Depot', colStart: 5, rowStart: 7, colSpan: 2, rowSpan: 4 },
       { ticker: 'NKE', name: 'Nike', colStart: 7, rowStart: 7, colSpan: 2, rowSpan: 4 },
@@ -101,8 +104,8 @@ const sectorData = [
     companyRows: 10,
     companies: [
       { ticker: 'TMUS', name: 'T-Mobile', colStart: 1, rowStart: 1, colSpan: 6, rowSpan: 6 },
-      { ticker: 'VZ', name: 'Verizon', colStart: 7, rowStart: 1, colSpan: 6, rowSpan: 4 },
-      { ticker: 'T', name: 'AT&T', colStart: 7, rowStart: 5, colSpan: 6, rowSpan: 2 },
+      { ticker: 'VZ', name: 'Verizon', colStart: 7, rowStart: 1, colSpan: 6, rowSpan: 3 },
+      { ticker: 'T', name: 'AT&T', colStart: 7, rowStart: 4, colSpan: 6, rowSpan: 3 },
       { ticker: 'CMCSA', name: 'Comcast', colStart: 1, rowStart: 7, colSpan: 4, rowSpan: 4 },
       { ticker: 'CHTR', name: 'Charter', colStart: 5, rowStart: 7, colSpan: 4, rowSpan: 4 },
       { ticker: 'DIS', name: 'Disney', colStart: 9, rowStart: 7, colSpan: 2, rowSpan: 4 },
@@ -164,11 +167,11 @@ const sectorData = [
     companyCols: 12,
     companyRows: 10,
     companies: [
-      { ticker: 'XOM', name: 'Exxon Mobil', colStart: 1, rowStart: 1, colSpan: 6, rowSpan: 6 },
+      { ticker: 'XOM', name: 'Exxon Mobil', colStart: 1, rowStart: 1, colSpan: 6, rowSpan: 4 },
       { ticker: 'CVX', name: 'Chevron', colStart: 7, rowStart: 1, colSpan: 6, rowSpan: 4 },
       { ticker: 'COP', name: 'ConocoPhillips', colStart: 7, rowStart: 5, colSpan: 3, rowSpan: 2 },
       { ticker: 'SBGSY', name: 'Schneider Electric', colStart: 10, rowStart: 5, colSpan: 3, rowSpan: 2 },
-      { ticker: 'GEV', name: 'GE Vernova', colStart: 1, rowStart: 7, colSpan: 6, rowSpan: 2 },
+      { ticker: 'GEV', name: 'GE Vernova', colStart: 1, rowStart: 5, colSpan: 6, rowSpan: 4 },
       { ticker: 'NEE', name: 'NextEra Energy', colStart: 7, rowStart: 7, colSpan: 3, rowSpan: 2 },
       { ticker: 'DUK', name: 'Duke Energy', colStart: 10, rowStart: 7, colSpan: 3, rowSpan: 2 },
       { ticker: 'SO', name: 'Southern Company', colStart: 1, rowStart: 9, colSpan: 3, rowSpan: 2 },

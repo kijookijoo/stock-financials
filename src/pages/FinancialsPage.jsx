@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router";
-import { ClipLoader } from "react-spinners";
 import './FinancialsPage.css'
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 
@@ -288,8 +287,16 @@ export function FinancialsPage() {
                                     </div>
 
                                     {isCaseLoading && (
-                                        <div className="company-case-output">
-                                            Generating {caseType || "bull"} case...
+                                        <div className="company-case-output case-loading-output" aria-live="polite">
+                                            <div className="company-case-loading-row">
+                                                <span className="company-case-loading-dot" />
+                                            </div>
+                                            <ul className="company-case-loading-list">
+                                                <li />
+                                                <li />
+                                                <li />
+                                                <li />
+                                            </ul>
                                         </div>
                                     )}
                                     {!isCaseLoading && companyCase && (
@@ -308,11 +315,15 @@ export function FinancialsPage() {
                             </motion.div>
 
                         </div>
-                    ) : <ClipLoader
-                        color={"#c5ac6b"}
-                        size={50}
-                        aria-label="Loading Spinner"
-                    />}
+                    ) : (
+                        <div className="financials-loading-panel" aria-live="polite">
+                            <div className="financials-loading-grid">
+                                <span />
+                                <span />
+                                <span />
+                            </div>
+                        </div>
+                    )}
 
 
 
